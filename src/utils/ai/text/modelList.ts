@@ -179,6 +179,15 @@ const modelList: Owned[] = [
   },
   {
     manufacturer: "zhipu",
+    model: "glm-5",
+    responseFormat: "object",
+    image: false,
+    think: false,
+    instance: createZhipu,
+    tool: true,
+  },
+  {
+    manufacturer: "zhipu",
     model: "glm-4.5-flash",
     responseFormat: "object",
     image: false,

@@ -590,6 +590,7 @@ export default async (knex: Knex, forceInit: boolean = false): Promise<void> => 
           // { manufacturer: "zhipu", model: "glm-4.5-flash", responseFormat: "object", image: 0, think: 1, tool: 1 },
           // { manufacturer: "zhipu", model: "glm-4-flash-250414", responseFormat: "object", image: 0, think: 0, tool: 1 },
           { manufacturer: "zhipu", model: "glm-4.6v", responseFormat: "object", image: 1, think: 1, tool: 1 },
+          { manufacturer: "zhipu", model: "glm-5", responseFormat: "object", image: 0, think: 0, tool: 1 },
           { manufacturer: "qwen", model: "qwen-vl-max", responseFormat: "schema", image: 1, think: 0, tool: 1 },
           { manufacturer: "qwen", model: "qwen-plus-latest", responseFormat: "schema", image: 0, think: 0, tool: 1 },
           { manufacturer: "qwen", model: "qwen-max", responseFormat: "schema", image: 0, think: 0, tool: 1 },
