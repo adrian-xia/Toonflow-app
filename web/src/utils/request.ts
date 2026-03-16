@@ -1,21 +1,16 @@
 import axios from 'axios'
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
 import { ElMessage } from 'element-plus'
-import router from '@/router'
-import { useProjectStore } from '@/stores/project'
 
 const service: AxiosInstance = axios.create({
   baseURL: '/api',
   timeout: 60000,
 })
 
-// 请求拦截器
+// 请求拦截器 - 移除 token 认证
 service.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token')
-    if (token) {
-      config.headers.Authorization = token
-    }
+    // 本地部署，无需 token 认证
     return config
   },
   (error) => {
@@ -32,14 +27,6 @@ service.interceptors.response.use(
     const { response } = error
     if (response) {
       switch (response.status) {
-        case 401:
-          ElMessage.error('登录已过期，请重新登录')
-          localStorage.removeItem('token')
-          // 清除项目信息
-          const projectStore = useProjectStore()
-          projectStore.clearCurrentProject()
-          router.push('/login')
-          break
         case 403:
           ElMessage.error('没有权限访问')
           break

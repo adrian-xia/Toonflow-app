@@ -1,19 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router'
-import { useUserStore } from '@/stores/user'
 
 const routes: RouteRecordRaw[] = [
-  {
-    path: '/login',
-    name: 'Login',
-    component: () => import('@/views/login/index.vue'),
-    meta: { title: '登录', requiresAuth: false },
-  },
   {
     path: '/',
     component: () => import('@/layouts/MainLayout.vue'),
     redirect: '/project',
-    meta: { requiresAuth: true },
     children: [
       {
         path: 'project',
@@ -78,20 +70,11 @@ const router = createRouter({
   routes,
 })
 
-// 路由守卫
+// 路由守卫 - 移除登录验证
 router.beforeEach((to, _from, next) => {
-  const userStore = useUserStore()
-  const token = userStore.token || localStorage.getItem('token')
-
-  if (to.meta.requiresAuth !== false && !token) {
-    next({ name: 'Login', query: { redirect: to.fullPath } })
-  } else if (to.name === 'Login' && token) {
-    next({ name: 'Project' })
-  } else {
-    // 设置页面标题
-    document.title = `${to.meta.title || 'Toonflow'} - AI短剧工厂`
-    next()
-  }
+  // 设置页面标题
+  document.title = `${to.meta.title || 'Toonflow'} - AI短剧工厂`
+  next()
 })
 
 export default router
