@@ -193,12 +193,14 @@ export default async (knex: Knex, forceInit: boolean = false): Promise<void> => 
       name: "t_config",
       builder: (table) => {
         table.integer("id").notNullable();
+        table.text("title"); // 配置名称，便于区分多个配置
         table.text("type");
         table.text("model");
         table.text("modelType");
         table.text("apiKey");
         table.text("baseUrl");
         table.text("manufacturer");
+        table.text("protocol"); // 协议类型: openai | claude
         table.bigInteger("createTime");
         table.integer("index");
         table.integer("userId");
@@ -237,59 +239,20 @@ export default async (knex: Knex, forceInit: boolean = false): Promise<void> => 
         table.integer("configId"); // 模型列表id
         table.text("name");
         table.text("key");
+        table.text("type"); // 模型类型 text | image
         table.primary(["id"]);
         table.unique(["id"]);
       },
       initData: async (knex) => {
         await knex("t_aiModelMap").insert([
-          {
-            id: 1,
-            configId: null,
-            name: "分镜Agent",
-            key: "storyboardAgent",
-          },
-          {
-            id: 2,
-            configId: null,
-            name: "分镜Agent图片生成",
-            key: "storyboardImage",
-          },
-          {
-            id: 3,
-            configId: null,
-            name: "大纲故事线Agent",
-            key: "outlineScriptAgent",
-          },
-          {
-            id: 4,
-            configId: null,
-            name: "资产提示词润色",
-            key: "assetsPrompt",
-          },
-          {
-            id: 5,
-            configId: null,
-            name: "资产图片生成",
-            key: "assetsImage",
-          },
-          {
-            id: 6,
-            configId: null,
-            name: "剧本生成",
-            key: "generateScript",
-          },
-          {
-            id: 7,
-            configId: null,
-            name: "视频提示词生成",
-            key: "videoPrompt",
-          },
-          {
-            id: 8,
-            configId: null,
-            name: "图片编辑",
-            key: "editImage",
-          },
+          { id: 1, configId: null, name: "分镜Agent", key: "storyboardAgent", type: "text" },
+          { id: 2, configId: null, name: "分镜Agent图片生成", key: "storyboardImage", type: "image" },
+          { id: 3, configId: null, name: "大纲故事线Agent", key: "outlineScriptAgent", type: "text" },
+          { id: 4, configId: null, name: "资产提示词润色", key: "assetsPrompt", type: "text" },
+          { id: 5, configId: null, name: "资产图片生成", key: "assetsImage", type: "image" },
+          { id: 6, configId: null, name: "剧本生成", key: "generateScript", type: "text" },
+          { id: 7, configId: null, name: "视频提示词生成", key: "videoPrompt", type: "text" },
+          { id: 8, configId: null, name: "图片编辑", key: "editImage", type: "image" },
         ]);
       },
     },
@@ -540,18 +503,19 @@ export default async (knex: Knex, forceInit: boolean = false): Promise<void> => 
         table.integer("configId");
         table.text("name");
         table.text("key");
+        table.text("type");
         table.primary(["id"]);
       },
       initData: async (knex) => {
         await knex("t_aiModelMap").insert([
-          { id: 1, configId: 3, name: "分镜Agent", key: "storyboardAgent" },
-          { id: 2, configId: 2, name: "大纲故事线Agent", key: "outlineScriptAgent" },
-          { id: 3, configId: 4, name: "资产提示词润色", key: "assetsPrompt" },
-          { id: 4, configId: 5, name: "资产图片生成", key: "assetsImage" },
-          { id: 5, configId: 3, name: "剧本生成", key: "generateScript" },
-          { id: 6, configId: 2, name: "视频提示词生成", key: "videoPrompt" },
-          { id: 7, configId: 5, name: "分镜图片生成", key: "storyboardImage" },
-          { id: 8, configId: 5, name: "图片编辑", key: "editImage" },
+          { id: 1, configId: 3, name: "分镜Agent", key: "storyboardAgent", type: "text" },
+          { id: 2, configId: 2, name: "大纲故事线Agent", key: "outlineScriptAgent", type: "text" },
+          { id: 3, configId: 4, name: "资产提示词润色", key: "assetsPrompt", type: "text" },
+          { id: 4, configId: 5, name: "资产图片生成", key: "assetsImage", type: "image" },
+          { id: 5, configId: 3, name: "剧本生成", key: "generateScript", type: "text" },
+          { id: 6, configId: 2, name: "视频提示词生成", key: "videoPrompt", type: "text" },
+          { id: 7, configId: 5, name: "分镜图片生成", key: "storyboardImage", type: "image" },
+          { id: 8, configId: 5, name: "图片编辑", key: "editImage", type: "image" },
         ]);
       },
     },

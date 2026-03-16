@@ -6,6 +6,7 @@ export interface t_aiModelMap {
   'id': number;
   'key'?: string | null;
   'name'?: string | null;
+  'type'?: string | null;
 }
 export interface t_assets {
   'duration'?: string | null;
@@ -39,6 +40,8 @@ export interface t_config {
   'manufacturer'?: string | null;
   'model'?: string | null;
   'modelType'?: string | null;
+  'protocol'?: string | null;
+  'title'?: string | null;
   'type'?: string | null;
   'userId'?: number | null;
 }
