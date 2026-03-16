@@ -1,0 +1,30 @@
+# 新版 Web 前端 Docker Compose 配置
+# 用法: docker-compose -f docker/docker-compose.web.yml up -d --build
+
+services:
+  toonflow:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.web
+    image: toonflow:web
+    container_name: toonflow-web
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+      - "60000:60000"
+    environment:
+      - NODE_ENV=prod
+    volumes:
+      - toonflow-data:/app/data
+      - toonflow-uploads:/app/uploads
+      - ../logs:/var/log
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  toonflow-data:
+  toonflow-uploads:

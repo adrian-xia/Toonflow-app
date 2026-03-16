@@ -380,10 +380,19 @@ const modelList: Owned[] = [
     instance: createGoogleGenerativeAI,
     tool: true,
   },
-  // Anthropic (Claude)
+  // Anthropic (Claude) - 全程中文支持
   {
     manufacturer: "anthropic",
-    model: "claude-opus-4-5",
+    model: "claude-opus-4-6",
+    responseFormat: "schema",
+    image: true,
+    think: false,
+    instance: createAnthropic,
+    tool: true,
+  },
+  {
+    manufacturer: "anthropic",
+    model: "claude-sonnet-4-6",
     responseFormat: "schema",
     image: true,
     think: false,
@@ -393,6 +402,15 @@ const modelList: Owned[] = [
   {
     manufacturer: "anthropic",
     model: "claude-haiku-4-5",
+    responseFormat: "schema",
+    image: true,
+    think: false,
+    instance: createAnthropic,
+    tool: true,
+  },
+  {
+    manufacturer: "anthropic",
+    model: "claude-opus-4-5",
     responseFormat: "schema",
     image: true,
     think: false,
