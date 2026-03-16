@@ -510,37 +510,41 @@ const modelList: Owned[] = [
     instance: createOpenAI,
     tool: true,
   },
-  // 阿里云百炼 Coding Plan
+  // 阿里云百炼 Coding Plan 推荐模型
+  // 千问 3.5 Plus - 支持图片理解
   {
     manufacturer: "aliyun_coding",
     model: "qwen3.5-plus",
     responseFormat: "schema",
-    image: false,
+    image: true,
     think: false,
     instance: createOpenAI,
     tool: true,
   },
+  // Kimi K2.5 - 支持图片理解
   {
     manufacturer: "aliyun_coding",
-    model: "qwen3-max",
+    model: "kimi-k2.5",
+    responseFormat: "schema",
+    image: true,
+    think: false,
+    instance: createOpenAI,
+    tool: true,
+  },
+  // GLM-5
+  {
+    manufacturer: "aliyun_coding",
+    model: "glm-5",
     responseFormat: "schema",
     image: false,
     think: false,
     instance: createOpenAI,
     tool: true,
   },
+  // MiniMax M2.5
   {
     manufacturer: "aliyun_coding",
-    model: "qwen-plus",
-    responseFormat: "schema",
-    image: false,
-    think: false,
-    instance: createOpenAI,
-    tool: true,
-  },
-  {
-    manufacturer: "aliyun_coding",
-    model: "qwen-turbo",
+    model: "MiniMax-M2.5",
     responseFormat: "schema",
     image: false,
     think: false,
