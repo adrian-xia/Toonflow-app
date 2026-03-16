@@ -19,8 +19,8 @@
           </el-table-column>
           <el-table-column prop="manufacturer" label="厂商" width="150" />
           <el-table-column label="操作" width="150" fixed="right">
-            <template #default>
-              <el-button type="primary" link size="small" @click="configureModel">配置</el-button>
+            <template #default="{ row }">
+              <el-button type="primary" link size="small" @click="configureModel(row)">配置</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -92,6 +92,29 @@
         <el-button type="primary" @click="handleAddModel">确定</el-button>
       </template>
     </el-dialog>
+
+    <!-- 配置模型对话框 -->
+    <el-dialog v-model="showConfigDialog" title="选择模型配置" width="500px">
+      <el-form label-width="100px">
+        <el-form-item label="功能模块">
+          <el-input :value="currentModel?.name" disabled />
+        </el-form-item>
+        <el-form-item label="选择模型">
+          <el-select v-model="selectedModelId" placeholder="请选择模型配置" style="width: 100%">
+            <el-option
+              v-for="config in configList"
+              :key="config.id"
+              :label="`${config.manufacturer} - ${config.model}`"
+              :value="config.id"
+            />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="showConfigDialog = false">取消</el-button>
+        <el-button type="primary" @click="handleConfigureModel">确定</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -99,9 +122,11 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { getAiModelMap, getSetting, addModel } from '@/api/setting'
+import { getAiModelMap, getSetting, addModel, configurationModel } from '@/api/setting'
+import { useProjectStore } from '@/stores/project'
 
 const router = useRouter()
+const projectStore = useProjectStore()
 
 const activeTab = ref('model')
 const loading = ref(false)
@@ -110,6 +135,9 @@ const modelList = ref<any[]>([])
 const configList = ref<any[]>([])
 const logList = ref<any[]>([])
 const showAddDialog = ref(false)
+const showConfigDialog = ref(false)
+const currentModel = ref<any>(null)
+const selectedModelId = ref<number | null>(null)
 const formData = ref({
   type: 'text',
   manufacturer: '',
@@ -162,9 +190,38 @@ const handleAddModel = async () => {
   }
 }
 
-const configureModel = async () => {
-  // TODO: 打开配置对话框，选择要使用的模型配置
-  ElMessage.info('配置功能开发中...')
+const configureModel = (row: any) => {
+  if (!projectStore.currentProjectId) {
+    ElMessage.warning('请先选择项目')
+    return
+  }
+  currentModel.value = row
+  selectedModelId.value = null
+  showConfigDialog.value = true
+}
+
+const handleConfigureModel = async () => {
+  if (!selectedModelId.value) {
+    ElMessage.warning('请选择模型配置')
+    return
+  }
+  if (!projectStore.currentProjectId || !currentModel.value) {
+    ElMessage.error('缺少必要参数')
+    return
+  }
+
+  try {
+    await configurationModel({
+      projectId: projectStore.currentProjectId,
+      type: currentModel.value.type,
+      modelId: selectedModelId.value
+    })
+    ElMessage.success('配置成功')
+    showConfigDialog.value = false
+    fetchModelList()
+  } catch (error: any) {
+    ElMessage.error(error.message || '配置失败')
+  }
 }
 
 const editConfig = (config: any) => {
