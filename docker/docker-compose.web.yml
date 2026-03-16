@@ -14,8 +14,12 @@ services:
       - "60000:60000"
     environment:
       - NODE_ENV=prod
+      - DB_HOST=192.168.1.100
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=123456
+      - DB_NAME=toonflow
     volumes:
-      - toonflow-data:/app/data
       - toonflow-uploads:/app/uploads
       - ../logs:/var/log
     healthcheck:
@@ -26,5 +30,4 @@ services:
       start_period: 40s
 
 volumes:
-  toonflow-data:
   toonflow-uploads:
