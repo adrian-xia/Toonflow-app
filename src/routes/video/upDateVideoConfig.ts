@@ -30,7 +30,7 @@ export default router.post(
 
     // 构建更新对象
     const updateData: Record<string, any> = {
-      updateTime: Date.now(),
+      updateTime: Date.now().toString(),
     };
 
     if (resolution !== undefined) {

@@ -29,7 +29,7 @@ export default router.post(
         reel: item.reel,
         chapter: item.chapter,
         chapterData: item.chapterData,
-        createTime: Date.now(),
+        createTime: Date.now().toString(),
       });
     }
 

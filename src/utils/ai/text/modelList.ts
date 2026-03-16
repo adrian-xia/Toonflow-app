@@ -29,6 +29,7 @@ const instanceMap = {
   volcengine: createOpenAI,
   openai: createOpenAI,
   zhipu: createZhipu,
+  zhipu_pool: createOpenAI,
   qwen: createQwen,
   gemini: createGoogleGenerativeAI,
   anthropic: createAnthropic,
@@ -184,6 +185,15 @@ const modelList: Owned[] = [
     image: false,
     think: false,
     instance: createZhipu,
+    tool: true,
+  },
+  {
+    manufacturer: "zhipu_pool",
+    model: "glm-5",
+    responseFormat: "object",
+    image: false,
+    think: false,
+    instance: createOpenAI,
     tool: true,
   },
   {

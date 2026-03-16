@@ -64,7 +64,7 @@ export default async (knex: Knex, forceInit: boolean = false): Promise<void> => 
         table.text("chapter");
         table.text("chapterData");
         table.integer("projectId");
-        table.integer("createTime");
+        table.bigInteger("createTime");
         table.primary(["id"]);
         table.unique(["id"]);
       },
@@ -101,7 +101,7 @@ export default async (knex: Knex, forceInit: boolean = false): Promise<void> => 
         table.text("type");
         table.text("artStyle");
         table.text("videoRatio");
-        table.integer("createTime");
+        table.bigInteger("createTime");
         table.integer("userId");
         table.primary(["id"]);
       },
@@ -199,7 +199,7 @@ export default async (knex: Knex, forceInit: boolean = false): Promise<void> => 
         table.text("apiKey");
         table.text("baseUrl");
         table.text("manufacturer");
-        table.integer("createTime");
+        table.bigInteger("createTime");
         table.integer("index");
         table.integer("userId");
         table.primary(["id"]);
@@ -224,8 +224,8 @@ export default async (knex: Knex, forceInit: boolean = false): Promise<void> => 
         table.integer("duration"); // 时长
         table.text("prompt"); // 提示词
         table.integer("selectedResultId"); // 选中的生成结果ID
-        table.integer("createTime"); // 创建时间
-        table.integer("updateTime"); // 更新时间
+        table.bigInteger("createTime"); // 创建时间
+        table.bigInteger("updateTime"); // 更新时间
         table.primary(["id"]);
         table.unique(["id"]);
       },
@@ -569,60 +569,35 @@ export default async (knex: Knex, forceInit: boolean = false): Promise<void> => 
         table.primary(["id"]);
       },
       initData: async (knex) => {
-        await knex("t_textModel").insert([
-          { manufacturer: "deepSeek", model: "deepseek-chat", responseFormat: "schema", image: 0, think: 0, tool: 1 },
-          { manufacturer: "deepSeek", model: "deepseek-reasoner", responseFormat: "schema", image: 0, think: 1, tool: 1 },
-          { manufacturer: "volcengine", model: "doubao-seed-2-0-pro-260215", responseFormat: "object", image: 1, think: 1, tool: 1 },
-          // { manufacturer: "volcengine", model: "doubao-seed-2-0-lite-260215", responseFormat: "object", image: 1, think: 1, tool: 1 },
-          // { manufacturer: "volcengine", model: "doubao-seed-2-0-mini-260215", responseFormat: "object", image: 1, think: 1, tool: 1 },
-          { manufacturer: "volcengine", model: "doubao-seed-1-8-251228", responseFormat: "schema", image: 1, think: 1, tool: 1 },
-          // { manufacturer: "volcengine", model: "doubao-seed-1-6-251015", responseFormat: "schema", image: 1, think: 1, tool: 1 },
-          // { manufacturer: "volcengine", model: "doubao-seed-1-6-lite-251015", responseFormat: "schema", image: 1, think: 1, tool: 1 },
-          // { manufacturer: "volcengine", model: "doubao-seed-1-6-flash-250828", responseFormat: "schema", image: 1, think: 1, tool: 1 },
-          { manufacturer: "zhipu", model: "glm-4.7", responseFormat: "object", image: 0, think: 0, tool: 1 },
-          // { manufacturer: "zhipu", model: "glm-4.7-flashx", responseFormat: "object", image: 0, think: 0, tool: 1 },
-          { manufacturer: "zhipu", model: "glm-4.6", responseFormat: "object", image: 0, think: 0, tool: 1 },
-          // { manufacturer: "zhipu", model: "glm-4.5-air", responseFormat: "object", image: 0, think: 0, tool: 1 },
-          // { manufacturer: "zhipu", model: "glm-4.5-airx", responseFormat: "object", image: 0, think: 0, tool: 1 },
-          // { manufacturer: "zhipu", model: "glm-4-long", responseFormat: "object", image: 0, think: 0, tool: 1 },
-          // { manufacturer: "zhipu", model: "glm-4-flashx-250414", responseFormat: "object", image: 0, think: 0, tool: 1 },
-          { manufacturer: "zhipu", model: "glm-4.7-flash", responseFormat: "object", image: 0, think: 0, tool: 1 },
-          // { manufacturer: "zhipu", model: "glm-4.5-flash", responseFormat: "object", image: 0, think: 1, tool: 1 },
-          // { manufacturer: "zhipu", model: "glm-4-flash-250414", responseFormat: "object", image: 0, think: 0, tool: 1 },
-          { manufacturer: "zhipu", model: "glm-4.6v", responseFormat: "object", image: 1, think: 1, tool: 1 },
-          { manufacturer: "zhipu", model: "glm-5", responseFormat: "object", image: 0, think: 0, tool: 1 },
-          { manufacturer: "qwen", model: "qwen-vl-max", responseFormat: "schema", image: 1, think: 0, tool: 1 },
-          { manufacturer: "qwen", model: "qwen-plus-latest", responseFormat: "schema", image: 0, think: 0, tool: 1 },
-          { manufacturer: "qwen", model: "qwen-max", responseFormat: "schema", image: 0, think: 0, tool: 1 },
-          // { manufacturer: "qwen", model: "qwen2.5-72b-instruct", responseFormat: "schema", image: 0, think: 0, tool: 1 },
-          // { manufacturer: "qwen", model: "qwen2.5-14b-instruct-1m", responseFormat: "schema", image: 0, think: 0, tool: 1 },
-          // { manufacturer: "qwen", model: "qwen2.5-vl-72b-instruct", responseFormat: "schema", image: 1, think: 0, tool: 1 },
-          // { manufacturer: "openai", model: "gpt-4o", responseFormat: "schema", image: 1, think: 0, tool: 1 },
-          // { manufacturer: "openai", model: "gpt-4o-mini", responseFormat: "schema", image: 1, think: 0, tool: 1 },
-          { manufacturer: "openai", model: "gpt-4.1", responseFormat: "schema", image: 1, think: 0, tool: 1 },
-          // { manufacturer: "openai", model: "gpt-5.1", responseFormat: "schema", image: 1, think: 0, tool: 1 },
-          { manufacturer: "openai", model: "gpt-5.2", responseFormat: "schema", image: 1, think: 0, tool: 1 },
-          { manufacturer: "gemini", model: "gemini-3-pro-preview", responseFormat: "schema", image: 1, think: 1, tool: 1 },
-          { manufacturer: "gemini", model: "gemini-2.5-pro", responseFormat: "schema", image: 1, think: 1, tool: 1 },
-          // { manufacturer: "gemini", model: "gemini-2.5-flash", responseFormat: "schema", image: 1, think: 1, tool: 1 },
-          // { manufacturer: "gemini", model: "gemini-2.0-flash", responseFormat: "schema", image: 1, think: 0, tool: 1 },
-          // { manufacturer: "gemini", model: "gemini-2.0-flash-lite", responseFormat: "schema", image: 1, think: 0, tool: 1 },
-          // { manufacturer: "gemini", model: "gemini-1.5-pro", responseFormat: "schema", image: 1, think: 0, tool: 1 },
-          // { manufacturer: "gemini", model: "gemini-1.5-flash", responseFormat: "schema", image: 1, think: 0, tool: 1 },
-          { manufacturer: "anthropic", model: "claude-opus-4-5", responseFormat: "schema", image: 1, think: 0, tool: 1 },
-          { manufacturer: "anthropic", model: "claude-haiku-4-5", responseFormat: "schema", image: 1, think: 0, tool: 1 },
-          { manufacturer: "anthropic", model: "claude-sonnet-4-5", responseFormat: "schema", image: 1, think: 0, tool: 1 },
-          { manufacturer: "anthropic", model: "claude-opus-4-1", responseFormat: "schema", image: 1, think: 0, tool: 1 },
-          // { manufacturer: "anthropic", model: "claude-opus-4-0", responseFormat: "schema", image: 1, think: 0, tool: 1 },
-          // { manufacturer: "anthropic", model: "claude-sonnet-4-0", responseFormat: "schema", image: 1, think: 0, tool: 1 },
-          // { manufacturer: "anthropic", model: "claude-3-7-sonnet-latest", responseFormat: "schema", image: 1, think: 0, tool: 1 },
-          // { manufacturer: "anthropic", model: "claude-3-5-haiku-latest", responseFormat: "schema", image: 1, think: 0, tool: 1 },
-          { manufacturer: "xai", model: "grok-3", responseFormat: "schema", image: 0, think: 0, tool: 1 },
-          { manufacturer: "xai", model: "grok-4", responseFormat: "schema", image: 0, think: 0, tool: 1 },
-          { manufacturer: "xai", model: "grok-4.1", responseFormat: "schema", image: 1, think: 0, tool: 1 },
-          { manufacturer: "other", model: "", responseFormat: "object", image: 1, think: 0, tool: 1 },
-          { manufacturer: "modelScope", model: "deepseek-ai/DeepSeek-V3.2", responseFormat: "object", image: 0, think: 0, tool: 1 },
-        ]);
+        const textModels = [
+          { id: 1, manufacturer: "deepSeek", model: "deepseek-chat", responseFormat: "schema", image: 0, think: 0, tool: 1 },
+          { id: 2, manufacturer: "deepSeek", model: "deepseek-reasoner", responseFormat: "schema", image: 0, think: 1, tool: 1 },
+          { id: 3, manufacturer: "volcengine", model: "doubao-seed-2-0-pro-260215", responseFormat: "object", image: 1, think: 1, tool: 1 },
+          { id: 4, manufacturer: "volcengine", model: "doubao-seed-1-8-251228", responseFormat: "schema", image: 1, think: 1, tool: 1 },
+          { id: 5, manufacturer: "zhipu", model: "glm-4.7", responseFormat: "object", image: 0, think: 0, tool: 1 },
+          { id: 6, manufacturer: "zhipu", model: "glm-4.6", responseFormat: "object", image: 0, think: 0, tool: 1 },
+          { id: 7, manufacturer: "zhipu", model: "glm-4.7-flash", responseFormat: "object", image: 0, think: 0, tool: 1 },
+          { id: 8, manufacturer: "zhipu", model: "glm-4.6v", responseFormat: "object", image: 1, think: 1, tool: 1 },
+          { id: 9, manufacturer: "zhipu_pool", model: "glm-5", responseFormat: "object", image: 0, think: 0, tool: 1 },
+          { id: 10, manufacturer: "zhipu", model: "glm-5", responseFormat: "object", image: 0, think: 0, tool: 1 },
+          { id: 11, manufacturer: "qwen", model: "qwen-vl-max", responseFormat: "schema", image: 1, think: 0, tool: 1 },
+          { id: 12, manufacturer: "qwen", model: "qwen-plus-latest", responseFormat: "schema", image: 0, think: 0, tool: 1 },
+          { id: 13, manufacturer: "qwen", model: "qwen-max", responseFormat: "schema", image: 0, think: 0, tool: 1 },
+          { id: 14, manufacturer: "openai", model: "gpt-4.1", responseFormat: "schema", image: 1, think: 0, tool: 1 },
+          { id: 15, manufacturer: "openai", model: "gpt-5.2", responseFormat: "schema", image: 1, think: 0, tool: 1 },
+          { id: 16, manufacturer: "gemini", model: "gemini-3-pro-preview", responseFormat: "schema", image: 1, think: 1, tool: 1 },
+          { id: 17, manufacturer: "gemini", model: "gemini-2.5-pro", responseFormat: "schema", image: 1, think: 1, tool: 1 },
+          { id: 18, manufacturer: "anthropic", model: "claude-opus-4-5", responseFormat: "schema", image: 1, think: 0, tool: 1 },
+          { id: 19, manufacturer: "anthropic", model: "claude-haiku-4-5", responseFormat: "schema", image: 1, think: 0, tool: 1 },
+          { id: 20, manufacturer: "anthropic", model: "claude-sonnet-4-5", responseFormat: "schema", image: 1, think: 0, tool: 1 },
+          { id: 21, manufacturer: "anthropic", model: "claude-opus-4-1", responseFormat: "schema", image: 1, think: 0, tool: 1 },
+          { id: 22, manufacturer: "xai", model: "grok-3", responseFormat: "schema", image: 0, think: 0, tool: 1 },
+          { id: 23, manufacturer: "xai", model: "grok-4", responseFormat: "schema", image: 0, think: 0, tool: 1 },
+          { id: 24, manufacturer: "xai", model: "grok-4.1", responseFormat: "schema", image: 1, think: 0, tool: 1 },
+          { id: 25, manufacturer: "other", model: "", responseFormat: "object", image: 1, think: 0, tool: 1 },
+          { id: 26, manufacturer: "modelScope", model: "deepseek-ai/DeepSeek-V3.2", responseFormat: "object", image: 0, think: 0, tool: 1 },
+        ];
+        await knex("t_textModel").insert(textModels);
       },
     },
     {
@@ -637,20 +612,20 @@ export default async (knex: Knex, forceInit: boolean = false): Promise<void> => 
       },
       initData: async (knex) => {
         await knex("t_imageModel").insert([
-          { manufacturer: "volcengine", model: "doubao-seedream-5-0-260128", grid: 1, type: "ti2i" },
-          { manufacturer: "volcengine", model: "doubao-seedream-4-5-251128", grid: 0, type: "ti2i" },
+          { id: 1, manufacturer: "volcengine", model: "doubao-seedream-5-0-260128", grid: 1, type: "ti2i" },
+          { id: 2, manufacturer: "volcengine", model: "doubao-seedream-4-5-251128", grid: 0, type: "ti2i" },
           // { manufacturer: "volcengine", model: "doubao-seedream-4-0-250828", grid: 0, type: "ti2i" },
-          { manufacturer: "kling", model: "kling-image-o1", grid: 0, type: "ti2i" },
-          { manufacturer: "gemini", model: "gemini-2.5-flash-image", grid: 1, type: "ti2i" },
-          { manufacturer: "gemini", model: "gemini-3-pro-image-preview", grid: 1, type: "ti2i" },
-          { manufacturer: "vidu", model: "viduq1", grid: 0, type: "i2i" },
-          { manufacturer: "vidu", model: "viduq2", grid: 0, type: "ti2i" },
-          { manufacturer: "runninghub", model: "nanobanana", grid: 1, type: "ti2i" },
-          { manufacturer: "modelScope", model: "Qwen/Qwen-Image", grid: 1, type: "ti2i" },
-          { manufacturer: "grsai", model: "nano-banana-fast", grid: 1, type: "ti2i" },
-          { manufacturer: "grsai", model: "nano-banana-pro", grid: 1, type: "ti2i" },
-          { manufacturer: "grsai", model: "nano-banana", grid: 1, type: "ti2i" },
-          { manufacturer: "grsai", model: "nano-banana-2", grid: 1, type: "ti2i" },
+          { id: 3, manufacturer: "kling", model: "kling-image-o1", grid: 0, type: "ti2i" },
+          { id: 4, manufacturer: "gemini", model: "gemini-2.5-flash-image", grid: 1, type: "ti2i" },
+          { id: 5, manufacturer: "gemini", model: "gemini-3-pro-image-preview", grid: 1, type: "ti2i" },
+          { id: 6, manufacturer: "vidu", model: "viduq1", grid: 0, type: "i2i" },
+          { id: 7, manufacturer: "vidu", model: "viduq2", grid: 0, type: "ti2i" },
+          { id: 8, manufacturer: "runninghub", model: "nanobanana", grid: 1, type: "ti2i" },
+          { id: 9, manufacturer: "modelScope", model: "Qwen/Qwen-Image", grid: 1, type: "ti2i" },
+          { id: 10, manufacturer: "grsai", model: "nano-banana-fast", grid: 1, type: "ti2i" },
+          { id: 11, manufacturer: "grsai", model: "nano-banana-pro", grid: 1, type: "ti2i" },
+          { id: 12, manufacturer: "grsai", model: "nano-banana", grid: 1, type: "ti2i" },
+          { id: 13, manufacturer: "grsai", model: "nano-banana-2", grid: 1, type: "ti2i" },
         ]);
       },
     },

@@ -1,7 +1,4 @@
 import { readFile, writeFile } from "fs/promises";
-import u from "@/utils";
-import fs from "fs";
-import path from "path";
 import knex from "knex";
 import initDB from "@/lib/initDB";
 import fixDB from "@/lib/fixDB";
@@ -11,39 +8,64 @@ import crypto from "crypto";
 type TableName = keyof DB & string;
 type RowType<TName extends TableName> = DB[TName];
 
-let dbPath: string;
-if (typeof process.versions?.electron !== "undefined") {
-  const { app } = require("electron");
-  const userDataDir: string = app.getPath("userData");
-  dbPath = path.join(userDataDir, "db.sqlite");
-} else {
-  dbPath = path.join(process.cwd(), "db.sqlite");
-}
-console.log("数据库目录:", dbPath);
-const dbDir = path.dirname(dbPath);
+// PostgreSQL 连接配置
+const dbHost = process.env.DB_HOST || "192.168.1.100";
+const dbPort = process.env.DB_PORT || "5432";
+const dbUser = process.env.DB_USER || "postgres";
+const dbPassword = process.env.DB_PASSWORD || "123456";
+const dbName = process.env.DB_NAME || "toonflow";
 
-// 确保数据库目录存在
-if (!fs.existsSync(dbDir)) {
-  fs.mkdirSync(dbDir, { recursive: true });
+console.log("数据库连接: PostgreSQL");
+
+// 先连接到 postgres 默认数据库，检查并创建目标数据库
+async function ensureDatabase() {
+  const connectionString = `postgresql://${dbUser}:${dbPassword}@${dbHost}:${dbPort}/postgres`;
+
+  const maintenanceDb = knex({
+    client: "pg",
+    connection: connectionString,
+  });
+
+  try {
+    const result = await maintenanceDb.raw("SELECT 1 FROM pg_database WHERE datname = ?", [dbName]);
+    if (result.rows.length === 0) {
+      console.log(`数据库 ${dbName} 不存在，正在创建...`);
+      await maintenanceDb.raw(`CREATE DATABASE "${dbName}"`);
+      console.log(`数据库 ${dbName} 创建成功`);
+    }
+  } catch (err) {
+    console.error("检查/创建数据库失败:", err);
+    throw err;
+  } finally {
+    await maintenanceDb.destroy();
+  }
 }
 
-// 创建空数据库文件
-if (!fs.existsSync(dbPath)) {
-  fs.writeFileSync(dbPath, "");
-}
+// 主数据库连接字符串
+const connectionString = `postgresql://${dbUser}:${dbPassword}@${dbHost}:${dbPort}/${dbName}`;
 
 const db = knex({
-  client: "sqlite3",
-  connection: {
-    filename: dbPath,
-  },
+  client: "pg",
+  connection: connectionString,
   useNullAsDefault: true,
 });
 
 (async () => {
-  await initDB(db);
-  await fixDB(db);
-  if (process.env.NODE_ENV == "dev") initKnexType(db);
+  try {
+    // 确保数据库存在
+    await ensureDatabase();
+
+    // 测试连接
+    await db.raw("SELECT 1");
+    console.log("数据库连接成功");
+
+    await initDB(db);
+    await fixDB(db);
+    if (process.env.NODE_ENV == "dev") initKnexType(db);
+  } catch (err) {
+    console.error("数据库初始化失败:", err);
+    process.exit(1);
+  }
 })();
 
 const dbClient = Object.assign(<TName extends TableName>(table: TName) => db<RowType<TName>, RowType<TName>[]>(table), db);
@@ -58,8 +80,8 @@ async function initKnexType(knexDb: any) {
   const dbClient = Client.fromConfig({
     interfaceNameFormat: "${table}",
     typeMap: {
-      number: ["bigint"],
-      string: ["text", "varchar", "char"],
+      number: ["bigint", "integer", "int4", "int8", "serial", "bigserial"],
+      string: ["text", "varchar", "char", "character varying", "character"],
     },
   }).fetchDatabase(knexDb);
   const declarations = await dbClient.toTypescript();

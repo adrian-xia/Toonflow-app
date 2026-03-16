@@ -1,9 +1,9 @@
-// @db-hash 0f9789bd5ad2eebd79bd502988efcb4e
+// @db-hash bc2d1b92f4a8ec3f4fb4cd96b6ca3b6b
 //该文件由脚本自动生成，请勿手动修改
 
 export interface t_aiModelMap {
   'configId'?: number | null;
-  'id'?: number;
+  'id': number;
   'key'?: string | null;
   'name'?: string | null;
 }
@@ -11,7 +11,7 @@ export interface t_assets {
   'duration'?: string | null;
   'episode'?: string | null;
   'filePath'?: string | null;
-  'id'?: number;
+  'id': number;
   'intro'?: string | null;
   'name'?: string | null;
   'projectId'?: number | null;
@@ -26,7 +26,7 @@ export interface t_assets {
 }
 export interface t_chatHistory {
   'data'?: string | null;
-  'id'?: number;
+  'id': number;
   'novel'?: string | null;
   'projectId'?: number | null;
   'type'?: string | null;
@@ -35,7 +35,7 @@ export interface t_config {
   'apiKey'?: string | null;
   'baseUrl'?: string | null;
   'createTime'?: number | null;
-  'id'?: number;
+  'id': number;
   'manufacturer'?: string | null;
   'model'?: string | null;
   'modelType'?: string | null;
@@ -45,7 +45,7 @@ export interface t_config {
 export interface t_image {
   'assetsId'?: number | null;
   'filePath'?: string | null;
-  'id'?: number;
+  'id': number;
   'projectId'?: number | null;
   'scriptId'?: number | null;
   'state'?: string | null;
@@ -54,7 +54,7 @@ export interface t_image {
 }
 export interface t_imageModel {
   'grid'?: number | null;
-  'id'?: number;
+  'id': number;
   'manufacturer'?: string | null;
   'model'?: string | null;
   'type'?: string | null;
@@ -64,20 +64,20 @@ export interface t_novel {
   'chapterData'?: string | null;
   'chapterIndex'?: number | null;
   'createTime'?: number | null;
-  'id'?: number;
+  'id': number;
   'projectId'?: number | null;
   'reel'?: string | null;
 }
 export interface t_outline {
   'data'?: string | null;
   'episode'?: number | null;
-  'id'?: number;
+  'id': number;
   'projectId'?: number | null;
 }
 export interface t_project {
   'artStyle'?: string | null;
   'createTime'?: number | null;
-  'id'?: number | null;
+  'id': number;
   'intro'?: string | null;
   'name'?: string | null;
   'type'?: string | null;
@@ -88,20 +88,20 @@ export interface t_prompts {
   'code'?: string | null;
   'customValue'?: string | null;
   'defaultValue'?: string | null;
-  'id'?: number;
+  'id': number;
   'name'?: string | null;
   'parentCode'?: string | null;
   'type'?: string | null;
 }
 export interface t_script {
   'content'?: string | null;
-  'id'?: number;
+  'id': number;
   'name'?: string | null;
   'outlineId'?: number | null;
   'projectId'?: number | null;
 }
 export interface t_setting {
-  'id'?: number;
+  'id': number;
   'imageModel'?: string | null;
   'languageModel'?: string | null;
   'projectId'?: number | null;
@@ -110,14 +110,14 @@ export interface t_setting {
 }
 export interface t_storyline {
   'content'?: string | null;
-  'id'?: number;
+  'id': number;
   'name'?: string | null;
   'novelIds'?: string | null;
   'projectId'?: number | null;
 }
 export interface t_taskList {
   'endTime'?: string | null;
-  'id'?: number;
+  'id': number;
   'name'?: string | null;
   'projectName'?: number | null;
   'prompt'?: string | null;
@@ -125,7 +125,7 @@ export interface t_taskList {
   'state'?: string | null;
 }
 export interface t_textModel {
-  'id'?: number;
+  'id': number;
   'image'?: number | null;
   'manufacturer'?: string | null;
   'model'?: string | null;
@@ -134,7 +134,7 @@ export interface t_textModel {
   'tool'?: number | null;
 }
 export interface t_user {
-  'id'?: number;
+  'id': number;
   'name'?: string | null;
   'password'?: string | null;
 }
@@ -144,7 +144,7 @@ export interface t_video {
   'errorReason'?: string | null;
   'filePath'?: string | null;
   'firstFrame'?: string | null;
-  'id'?: number;
+  'id': number;
   'model'?: string | null;
   'prompt'?: string | null;
   'resolution'?: string | null;
@@ -159,7 +159,7 @@ export interface t_videoConfig {
   'createTime'?: number | null;
   'duration'?: number | null;
   'endFrame'?: string | null;
-  'id'?: number;
+  'id': number;
   'images'?: string | null;
   'manufacturer'?: string | null;
   'mode'?: string | null;
@@ -175,7 +175,7 @@ export interface t_videoModel {
   'aspectRatio'?: string | null;
   'audio'?: number | null;
   'durationResolutionMap'?: string | null;
-  'id'?: number;
+  'id': number;
   'manufacturer'?: string | null;
   'model'?: string | null;
   'type'?: string | null;

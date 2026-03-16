@@ -18,14 +18,19 @@ export default router.post(
   async (req, res) => {
     const { type, model, baseUrl, apiKey, manufacturer, modelType } = req.body;
 
+    // 获取当前最大 id
+    const maxIdResult = await u.db("t_config").max("id as maxId").first();
+    const newId = (maxIdResult?.maxId || 0) + 1;
+
     await u.db("t_config").insert({
+      id: newId,
       type,
       model,
       baseUrl,
       apiKey,
       manufacturer,
       modelType,
-      createTime: Date.now(),
+      createTime: Date.now().toString(),
       userId: 1,
     });
     res.status(200).send(success("新增成功"));
