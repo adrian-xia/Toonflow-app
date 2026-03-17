@@ -10,16 +10,13 @@ export default router.post(
   "/",
   validateFields({
     id: z.number(),
-    index: z.union([z.number(), z.string()]),
-    reel: z.string(),
-    chapter: z.string(),
-    chapterData: z.string(),
+    chapterIndex: z.number(),
   }),
   async (req, res) => {
-    const { id, index, reel, chapter, chapterData } = req.body;
+    const { id, chapterIndex, reel, chapter, chapterData } = req.body;
 
     await u.db("t_novel").where("id", id).update({
-      chapterIndex: index,
+      chapterIndex,
       reel,
       chapter,
       chapterData,
