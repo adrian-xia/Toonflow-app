@@ -22,8 +22,13 @@ export default router.post(
   async (req, res) => {
     const { projectId, data } = req.body;
 
+    // 获取当前最大 id
+    const maxIdResult = await u.db("t_novel").max("id as maxId").first();
+    let nextId = (maxIdResult?.maxId || 0) + 1;
+
     for (const item of data) {
       await u.db("t_novel").insert({
+        id: nextId++,
         projectId,
         chapterIndex: item.index,
         reel: item.reel,
