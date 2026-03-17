@@ -28,14 +28,14 @@
         <template #header>
           <div class="card-header">
             <span class="project-name">{{ project.name }}</span>
-            <el-dropdown @click.stop trigger="click">
-              <el-button type="primary" link>
+            <el-dropdown trigger="click" @command="(cmd: string) => handleCommand(cmd, project)">
+              <el-button type="primary" link @click.stop>
                 <el-icon><MoreFilled /></el-icon>
               </el-button>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item @click="showEditDialog(project)">编辑</el-dropdown-item>
-                  <el-dropdown-item divided @click="handleDelete(project.id)">删除</el-dropdown-item>
+                  <el-dropdown-item command="edit">编辑</el-dropdown-item>
+                  <el-dropdown-item command="delete" divided>删除</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -225,6 +225,15 @@ const goToDetail = (id: number) => {
     projectStore.setCurrentProject(id, project.name)
   }
   router.push(`/project/${id}`)
+}
+
+// 处理下拉菜单命令
+const handleCommand = (command: string, project: Project) => {
+  if (command === 'edit') {
+    showEditDialog(project)
+  } else if (command === 'delete') {
+    handleDelete(project.id)
+  }
 }
 
 onMounted(() => {

@@ -10,19 +10,21 @@ export default router.post(
   "/",
   validateFields({
     id: z.number(),
+    name: z.string().optional().nullable(),
     intro: z.string().optional().nullable(),
     type: z.string().optional().nullable(),
     artStyle: z.string().optional().nullable(),
     videoRatio: z.string().optional().nullable(),
   }),
   async (req, res) => {
-    const { id, intro, type, artStyle, videoRatio } = req.body;
+    const { id, name, intro, type, artStyle, videoRatio } = req.body;
 
     await u.db("t_project").where("id", id).update({
-      intro,
-      type,
-      artStyle,
-      videoRatio,
+      ...(name !== undefined && { name }),
+      ...(intro !== undefined && { intro }),
+      ...(type !== undefined && { type }),
+      ...(artStyle !== undefined && { artStyle }),
+      ...(videoRatio !== undefined && { videoRatio }),
     });
 
     res.status(200).send(success({ message: "修改成功" }));
