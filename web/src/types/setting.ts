@@ -12,9 +12,14 @@ export interface AiModel {
 // 配置项
 export interface Config {
   id: number
+  title?: string // 配置名称
   type: string
   manufacturer: string
   model: string
+  baseUrl: string
+  apiKey: string
+  protocol?: 'openai' | 'claude' // 协议类型
+  modelType?: string
   url?: string
   key?: string
   projectId: number

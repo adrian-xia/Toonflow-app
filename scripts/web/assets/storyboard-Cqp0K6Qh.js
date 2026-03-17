@@ -1,0 +1,1 @@
+import{r as o}from"./_plugin-vue_export-helper-CatvoXP8.js";function a(r){return o.post("/storyboard/getStoryboard",r)}function e(r){return o.post("/storyboard/generateStoryboardApi",r)}function s(r){return o.post("/storyboard/delStoryboard",{id:r})}function d(r){return o.post("/storyboard/saveStoryboard",r)}export{e as a,s as d,a as g,d as s};

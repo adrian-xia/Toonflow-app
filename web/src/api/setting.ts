@@ -33,7 +33,7 @@ export function deleteModel(id: number): Promise<ApiResponse<null>> {
 }
 
 // 配置模型
-export function configurationModel(data: { projectId: number; type: string; modelId: number }): Promise<ApiResponse<null>> {
+export function configurationModel(data: { id: number; configId: number }): Promise<ApiResponse<null>> {
   return request.post('/setting/configurationModel', data)
 }
 

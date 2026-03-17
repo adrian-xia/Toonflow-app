@@ -3,7 +3,6 @@ import { success, error } from "@/lib/responseFormat";
 import { validateFields } from "@/middleware/middleware";
 import u from "@/utils";
 import { z } from "zod";
-import { tool } from "ai";
 const router = express.Router();
 
 // 检查语言模型
@@ -18,26 +17,11 @@ export default router.post(
   async (req, res) => {
     const { modelName, apiKey, baseURL, manufacturer } = req.body;
 
-    const getWeatherTool = tool({
-      description: "Get the weather in a location",
-      inputSchema: z.object({
-        location: z.string().describe("The location to get the weather for"),
-      }),
-      execute: async ({ location }) => {
-        return {
-          location,
-          temperature: 72 + Math.floor(Math.random() * 21) - 10,
-        };
-      },
-    });
     try {
-      const { reply } = await u.ai.text.invoke(
+      // 简单测试：直接调用 AI 不使用工具
+      const result = await u.ai.text.invoke(
         {
-          prompt: "请调用工具获取北京的天气，并回答我多少气温",
-          tools: { getWeatherTool },
-          output: {
-            reply: z.string().describe("回复内容"),
-          },
+          prompt: "你好，请简单介绍一下你自己，用一句话回答。",
         },
         {
           model: modelName,
@@ -46,7 +30,7 @@ export default router.post(
           manufacturer,
         },
       );
-      res.status(200).send(success(reply));
+      res.status(200).send(success(result.text));
     } catch (err) {
       const msg = u.error(err).message;
       console.error(msg);

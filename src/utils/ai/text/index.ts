@@ -1,11 +1,16 @@
 import u from "@/utils";
 import { generateText, streamText, Output, stepCountIs, ModelMessage, LanguageModel, Tool, GenerateTextResult } from "ai";
 import { wrapLanguageModel } from "ai";
-import { devToolsMiddleware } from "@ai-sdk/devtools";
 import { parse } from "best-effort-json-parser";
-import { getModelList } from "./modelList";
+import { createOpenAI, OpenAIProvider } from "@ai-sdk/openai";
+import { createAnthropic } from "@ai-sdk/anthropic";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { createDeepSeek } from "@ai-sdk/deepseek";
+import { createZhipu } from "zhipu-ai-provider";
+import { createQwen } from "qwen-ai-provider-v5";
+import { createXai } from "@ai-sdk/xai";
 import { z } from "zod";
-import { OpenAIProvider } from "@ai-sdk/openai";
+
 interface AIInput<T extends Record<string, z.ZodTypeAny> | undefined = undefined> {
   system?: string;
   tools?: Record<string, Tool>;
@@ -22,51 +27,63 @@ interface AIConfig {
   manufacturer?: string;
 }
 
+// 厂商实例映射
+const instanceMap: Record<string, any> = {
+  deepSeek: createDeepSeek,
+  volcengine: createOpenAI,
+  openai: createOpenAI,
+  zhipu: createZhipu,
+  zhipu_pool: createOpenAI,
+  qwen: createQwen,
+  gemini: createGoogleGenerativeAI,
+  anthropic: createAnthropic,
+  modelScope: (options: any) => createOpenAI({ ...options, headers: { ...options?.headers, "X-ModelScope-Async-Mode": "true" } }),
+  xai: createXai,
+  aliyun_coding: createOpenAI,
+  other: createOpenAI,
+  grsai: createOpenAI,
+};
+
+// 使用 chat 模式的厂商
+const chatModelManufacturers = ["volcengine", "other", "openai", "modelScope", "grsai", "zhipu_pool", "aliyun_coding"];
+
 const buildOptions = async (input: AIInput<any>, config: AIConfig = {}) => {
   if (!config || !config?.model || !config?.apiKey || !config?.manufacturer) throw new Error("请检查模型配置是否正确");
   const { model, apiKey, baseURL, manufacturer } = { ...config };
-  let owned;
-  const modelList = await getModelList();
-  if (manufacturer == "other") {
-    owned = modelList.find((m) => m.manufacturer === manufacturer);
-  } else {
-    owned = modelList.find((m) => m.model === model && m.manufacturer === manufacturer);
-    if (!owned) owned = modelList.find((m) => m.manufacturer === manufacturer);
-  }
-  if (!owned) throw new Error("不支持的厂商");
 
-  const modelInstance = owned.instance({ apiKey, baseURL: baseURL!, name: "xixixi" });
+  // 获取厂商实例
+  const createInstance = instanceMap[manufacturer];
+  if (!createInstance) throw new Error(`不支持的厂商: ${manufacturer}`);
+
+  const modelInstance = createInstance({ apiKey, baseURL: baseURL!, name: model });
+
+  // 构建 model 函数
+  const modelFn = chatModelManufacturers.includes(manufacturer)
+    ? (modelInstance as OpenAIProvider).chat(model!)
+    : modelInstance(model!);
 
   const maxStep = input.maxStep ?? (input.tools ? Object.keys(input.tools).length * 5 : undefined);
+
+  // 默认使用 schema 格式（大部分现代模型支持）
+  const responseFormat = "schema";
   const outputBuilders: Record<string, (schema: any) => any> = {
     schema: (s) => {
       return Output.object({ schema: z.object(s) });
     },
-    object: () => {
-      const jsonSchemaPrompt = `\n请按照以下 JSON Schema 格式返回结果:\n${JSON.stringify(
-        z.toJSONSchema(z.object(input.output)),
-        null,
-        2,
-      )}\n只返回结果，不要将Schema返回。`;
-      input.system = (input.system ?? "") + jsonSchemaPrompt;
-      // return Output.json();
-    },
   };
 
-  const output = input.output ? (outputBuilders[owned.responseFormat]?.(input.output) ?? null) : null;
-  const chatModelManufacturer = ["volcengine", "other", "openai", "modelScope","grsai", "zhipu_pool"];
-  const modelFn = chatModelManufacturer.includes(owned.manufacturer) ? (modelInstance as OpenAIProvider).chat(model!) : modelInstance(model!);
+  const output = input.output ? (outputBuilders[responseFormat]?.(input.output) ?? null) : null;
 
   return {
     config: {
       model: modelFn as LanguageModel,
       ...(input.system && { system: input.system }),
       ...(input.prompt ? { prompt: input.prompt } : { messages: input.messages! }),
-      ...(input.tools && owned.tool && { tools: input.tools }),
+      ...(input.tools && { tools: input.tools }),
       ...(maxStep && { stopWhen: stepCountIs(maxStep) }),
       ...(output && { output }),
     },
-    responseFormat: owned.responseFormat,
+    responseFormat,
   };
 };
 

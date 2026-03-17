@@ -33,7 +33,7 @@ FROM node:24-alpine
 WORKDIR /app
 
 # 安装 nginx 和 supervisor
-RUN apk add --no-cache nginx supervisor && \
+RUN apk add --no-cache nginx supervisor curl && \
     mkdir -p /var/lib/nginx/logs /var/log/nginx && \
     npm config set registry https://registry.npmmirror.com/ && \
     yarn config set registry https://registry.npmmirror.com/ && \

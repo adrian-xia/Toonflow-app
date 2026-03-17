@@ -1,0 +1,1 @@
+import{r as e}from"./_plugin-vue_export-helper-CatvoXP8.js";function u(t){return e.post("/outline/getOutline",{projectId:t})}function i(t){return e.post("/outline/delOutline",{id:t})}const o="/outline/agentsOutline";export{o as W,i as d,u as g};
