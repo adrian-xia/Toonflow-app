@@ -1,49 +1,43 @@
 # Toonflow
 
-Toonflow is currently in Phase 0 of a fresh monorepo bootstrap. The repository is organized as a `pnpm` workspace, orchestrated by `turbo`, and typed with TypeScript project references.
+## Phase 0 Monorepo Skeleton
 
-At this stage, only two workspace packages contain real implementation:
+当前仓库已经切换为 Phase 0 的 monorepo 冷启动骨架，用来承接后续 Creator Console、Review Console、MCP Server 和 Electron 壳的分层演进。这个阶段是新项目初始化，不做旧单体迁移，也不保留兼容层。
 
-- `apps/api`: minimal Express API with `GET /health`
-- `packages/kernel`: shared response, error, and health payload primitives
+目前真正可运行的只有两个包：
 
-The other application packages exist as formal placeholders for later phases:
+- `packages/kernel`：共享响应封装、错误模型和健康检查类型
+- `apps/api`：最小 Express HTTP 壳，提供 `/health`
 
-- `apps/web`
-- `apps/review-console`
-- `apps/mcp-server`
-- `apps/electron`
+其余应用 `apps/web`、`apps/review-console`、`apps/mcp-server`、`apps/electron` 当前都只是正式占位包，供后续阶段逐步落地。
 
-Conflicting legacy implementation has been removed. This repository does not keep compatibility shims, forwarding layers, or the old monolith layout.
+## 工具链
 
-## Quick Start
+- `pnpm workspace`
+- `turbo`
+- `TypeScript project references`
 
-### Requirements
+根目录只负责 workspace 编排，不承载运行时业务代码。
 
-- Node.js 20+
-- `pnpm` 10
-
-### Install
+## 快速开始
 
 ```bash
 pnpm install
-```
-
-### Start the current runnable app
-
-```bash
+pnpm lint
+pnpm build
+pnpm typecheck
+pnpm --filter @toonflow/kernel test
+pnpm --filter @toonflow/api test
 pnpm dev
 ```
 
-The root `dev` script delegates to `@toonflow/api`, which starts the API on `http://127.0.0.1:3001` by default.
-
-### Verify the health endpoint
+默认启动 `@toonflow/api`，监听 `http://127.0.0.1:3001`。
 
 ```bash
 curl http://127.0.0.1:3001/health
 ```
 
-Expected response shape:
+期望返回：
 
 ```json
 {
@@ -51,59 +45,41 @@ Expected response shape:
   "data": {
     "status": "ok",
     "service": "api",
-    "timestamp": "2026-03-19T00:00:00.000Z"
+    "timestamp": "2026-03-19T12:00:00.000Z"
   }
 }
 ```
 
-## Workspace Commands
-
-Run these from the repository root:
-
-```bash
-pnpm build
-pnpm typecheck
-pnpm lint
-```
-
-- `pnpm build`: runs the Turbo `build` pipeline across the workspace
-- `pnpm typecheck`: runs workspace type checks through Turbo
-- `pnpm lint`: currently maps to TypeScript-based static checks in implemented packages
-
-## Repository Layout
+## 目录结构
 
 ```text
 .
 ├── apps/
-│   ├── api/              # runnable Express API
-│   ├── electron/         # placeholder app
-│   ├── mcp-server/       # placeholder app
-│   ├── review-console/   # placeholder app
-│   └── web/              # placeholder app
+│   ├── api/              # 当前唯一运行中的 HTTP 入口
+│   ├── web/              # 占位包
+│   ├── review-console/   # 占位包
+│   ├── mcp-server/       # 占位包
+│   └── electron/         # 占位包
 ├── packages/
-│   └── kernel/           # shared types, errors, response helpers
+│   └── kernel/           # 共享契约与纯函数内核
 ├── docs/
-│   └── refactoring/      # architecture and phase documents
-├── package.json          # root workspace scripts
-├── pnpm-workspace.yaml   # workspace package discovery
-├── tsconfig.json         # root TypeScript references
-├── tsconfig.base.json    # shared compiler baseline
-└── turbo.json            # task pipeline
+│   └── refactoring/
+│       ├── architecture-overview.md
+│       └── 00-monorepo-skeleton.md
+├── pnpm-workspace.yaml
+├── turbo.json
+├── tsconfig.base.json
+└── tsconfig.json
 ```
 
-### `apps/`
+## Phase 0 约束
 
-`apps/` contains executable entrypoints. In Phase 0, only `apps/api` is implemented. The remaining app directories are intentionally minimal so later phases can add real runtime code without reviving the deleted monolith.
+- 旧实现与新骨架冲突时，直接删除旧实现，不做兼容适配。
+- 根 `tsconfig.json` 只引用真实可编译包：`packages/kernel` 与 `apps/api`。
+- `packages/kernel` 保持无副作用、无 IO、无容器依赖。
+- `apps/api` 只验证最小链路，不提前引入 services、db、workflow 等抽象。
 
-### `packages/`
+## 参考文档
 
-`packages/` contains shared libraries. `packages/kernel` is the only implemented package today and provides the response envelope helpers, normalized application errors, and the health payload type consumed by `apps/api`.
-
-## Architecture Notes
-
-- Root config is responsible only for workspace orchestration.
-- Package boundaries are explicit from the start.
-- New implementation should land inside `apps/` or `packages/`.
-- If an old design conflicts with the new structure, delete the old path instead of adding a compatibility layer.
-
-See [docs/refactoring/architecture-overview.md](./docs/refactoring/architecture-overview.md) for the target architecture and [docs/refactoring/00-monorepo-skeleton.md](./docs/refactoring/00-monorepo-skeleton.md) for the Phase 0 baseline.
+- 架构方向：`docs/refactoring/architecture-overview.md`
+- 当前阶段说明：`docs/refactoring/00-monorepo-skeleton.md`
