@@ -8,8 +8,5 @@
     "lint": "tsc --pretty false --noEmit -p tsconfig.json",
     "typecheck": "tsc --pretty false --noEmit -p tsconfig.json",
     "test": "node --import tsx --test test/**/*.test.ts"
-  },
-  "dependencies": {
-    "zod": "^4.3.5"
   }
 }
