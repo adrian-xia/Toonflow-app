@@ -1,10 +1,22 @@
 {
   "name": "@toonflow/api",
   "private": true,
+  "main": "dist/main.js",
+  "types": "dist/main.d.ts",
   "scripts": {
-    "build": "node -e \"console.log('placeholder build: @toonflow/api')\"",
-    "dev": "node -e \"console.log('placeholder dev: @toonflow/api')\"",
-    "lint": "node -e \"process.exit(0)\"",
-    "typecheck": "node -e \"process.exit(0)\""
+    "build": "tsc -b",
+    "dev": "tsx watch src/main.ts",
+    "lint": "tsc --pretty false --noEmit -p tsconfig.json",
+    "typecheck": "tsc --pretty false --noEmit -p tsconfig.json",
+    "test": "node --import tsx --test test/**/*.test.ts"
+  },
+  "dependencies": {
+    "@toonflow/kernel": "workspace:*",
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/supertest": "^6.0.3",
+    "supertest": "^7.1.1"
   }
 }

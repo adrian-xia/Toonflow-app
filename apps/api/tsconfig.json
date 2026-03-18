@@ -1,16 +1,12 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "composite": true,
     "module": "CommonJS",
     "moduleResolution": "Node",
-    "types": ["node"],
-    "composite": true,
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "rootDir": "./src",
-    "outDir": "./dist",
-    "noEmit": false
+    "rootDir": "src",
+    "outDir": "dist"
   },
-  "files": []
+  "references": [{ "path": "../../packages/kernel" }],
+  "include": ["src/**/*.ts"]
 }
