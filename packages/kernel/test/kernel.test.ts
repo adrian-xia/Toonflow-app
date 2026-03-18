@@ -17,7 +17,34 @@ test("fail returns normalized error metadata", () => {
 });
 
 test("normalizeError converts unknown values into AppError", () => {
-  const normalized = normalizeError(new Error("bad"));
+  const normalized = normalizeError("bad");
   assert.equal(normalized instanceof AppError, true);
   assert.equal(normalized.code, ErrorCode.INTERNAL_ERROR);
+  assert.equal(normalized.message, "Unknown error");
+  assert.equal(normalized.details, "bad");
+});
+
+test("normalizeError preserves context when wrapping Error", () => {
+  const original = new Error("bad");
+  original.stack = "Error: bad\n    at fake:1:1";
+
+  const normalized = normalizeError(original);
+
+  assert.equal(normalized.code, ErrorCode.INTERNAL_ERROR);
+  assert.equal(normalized.message, "bad");
+  assert.equal(normalized.stack, original.stack);
+  assert.equal(
+    (normalized as AppError & {
+      cause?: unknown;
+    }).cause,
+    original
+  );
+});
+
+test("normalizeError returns AppError instances as-is", () => {
+  const original = new AppError(ErrorCode.VALIDATION_ERROR, "invalid", 400, {
+    field: "name"
+  });
+
+  assert.equal(normalizeError(original), original);
 });
