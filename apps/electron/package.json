@@ -1,0 +1,10 @@
+{
+  "name": "@toonflow/electron",
+  "private": true,
+  "scripts": {
+    "build": "node -e \"console.log('placeholder build: @toonflow/electron')\"",
+    "dev": "node -e \"console.log('placeholder dev: @toonflow/electron')\"",
+    "lint": "node -e \"process.exit(0)\"",
+    "typecheck": "node -e \"process.exit(0)\""
+  }
+}
