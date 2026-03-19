@@ -2,103 +2,82 @@
 
 ## 目标
 
-将 AI 调用和文件存储独立为可复用包，与业务逻辑解耦。
+把 AI 调用与文件存储从入口层和业务层中抽离，形成两个独立包：
+
+- `packages/ai-providers`
+- `packages/storage`
+
+它们都应通过显式依赖注入被上层消费，而不是挂在全局工具对象上。
 
 ---
 
-## 当前状态
+## `packages/ai-providers`
 
-### AI 抽象层 (`src/utils/ai/`)
+### 职责
 
-| 文件 | 说明 |
-|------|------|
-| `text/index.ts` | `invoke()` + `stream()`，支持 13 个厂商后端（deepSeek、volcengine、openai、zhipu、qwen、gemini、anthropic 等） |
-| `text/modelList.ts` | 50+ 文本模型定义 |
-| `image/index.ts` | 图像生成调度器 |
-| `image/type.ts` | `ImageConfig` 全局接口 |
-| `image/modelList.ts` | 图像模型列表 |
-| `image/owned/` | 各厂商图像实现 |
-| `video/index.ts` | 视频生成调度器 |
-| `video/type.ts` | `VideoConfig` 全局接口 |
-| `video/modelList.ts` | 40+ 视频模型定义 |
-| `video/owned/` | 各厂商视频实现 |
-| `utils.ts` | `validateVideoConfig()`、`pollTask()` |
+- 文本模型调用
+- 图像模型调用
+- 视频模型调用
+- 模型注册与配置解析
+- 厂商差异适配
 
-使用方式：通过 `u.ai.text.invoke()` / `u.ai.text.stream()` / `u.ai.image` / `u.ai.video`
+### 建议结构
 
-### 文件存储 (`src/utils/oss.ts`)
-
-- `OSS` 类，本地文件存储实现
-- 方法：`getFileUrl`、`getFile`、`getImageBase64`、`deleteFile`、`deleteDirectory`、`writeFile`、`fileExists`
-- 路径安全校验（`is-path-inside`）
-- Electron 感知的根目录选择
-
----
-
-## 2.1 `@toonflow/ai-providers`
-
-### 包结构
-
-```
+```text
 packages/ai-providers/
 ├── src/
 │   ├── index.ts
 │   ├── text/
-│   │   ├── index.ts       # invoke() + stream() 接口
-│   │   └── modelList.ts   # 模型定义
 │   ├── image/
-│   │   ├── index.ts       # 图像生成调度
-│   │   ├── type.ts        # 接口定义
-│   │   ├── modelList.ts
-│   │   └── owned/         # 各厂商实现
 │   ├── video/
-│   │   ├── index.ts       # 视频生成调度
-│   │   ├── type.ts        # 接口定义
-│   │   ├── modelList.ts
-│   │   └── owned/         # 各厂商实现
-│   └── utils.ts
+│   └── registry.ts
 ├── package.json
 └── tsconfig.json
 ```
 
-### 关键接口保持不变
+### 接口方向
 
-```typescript
-ai.text.invoke(input, config)   // 同步调用，返回完整结果
-ai.text.stream(input, config)   // 流式调用，实时返回生成内容
-ai.image.generate(config)       // 图像生成
-ai.video.generate(config)       // 视频生成
+```ts
+textProvider.invoke(input, config);
+textProvider.stream(input, config);
+imageProvider.generate(config);
+videoProvider.generate(config);
 ```
 
-### 依赖
+约束：
 
-| 依赖 | 用途 |
-|------|------|
-| `@toonflow/kernel` | 类型定义 |
-| `@toonflow/db` | 读取 `t_config` 表获取模型配置 |
-| `ai` | Vercel AI SDK v6 |
-| `@ai-sdk/*` | 各厂商 SDK |
+- 不依赖 Express、Electron 或前端
+- 厂商 SDK 封装不泄漏到上层业务代码
+- 共享类型与错误放在 `@toonflow/kernel`
 
 ---
 
-## 2.2 `@toonflow/storage`
+## `packages/storage`
 
-### 包结构
+### 职责
 
-```
+- 文件读写
+- URL 生成
+- 图片 Base64 读取
+- 本地与对象存储抽象
+
+### 建议结构
+
+```text
 packages/storage/
 ├── src/
 │   ├── index.ts
-│   ├── interface.ts    # IStorage 接口
-│   └── local.ts        # LocalStorage 实现
+│   ├── interface.ts
+│   ├── local.ts
+│   └── s3.ts
 ├── package.json
 └── tsconfig.json
 ```
 
-### 接口抽象
+### 接口示例
 
-```typescript
-interface IStorage {
+```ts
+interface StorageAdapter {
   getFileUrl(filePath: string): string;
   getFile(filePath: string): Promise<Buffer>;
   getImageBase64(filePath: string): Promise<string>;
@@ -109,39 +88,35 @@ interface IStorage {
 }
 ```
 
-当前实现为 `LocalStorage`，未来可扩展 `S3Storage`、`OSSStorage` 等。
-
 ---
 
-## 2.3 兼容层
+## 集成方式
 
-在 `apps/api/src/utils.ts` 中通过兼容层保持现有调用方式不变：
+上层通过显式构造组合依赖：
 
-```typescript
-import { AIText, AIImage, AIVideo } from "@toonflow/ai-providers";
-import { LocalStorage } from "@toonflow/storage";
+```ts
+import { createTextProvider } from "@toonflow/ai-providers";
+import { createLocalStorage } from "@toonflow/storage";
 
-export default {
-  ai: { text: AIText, image: AIImage, video: AIVideo },
-  oss: new LocalStorage(rootDir),
-  // ... 其他保持不变
-};
+const text = createTextProvider(providerConfig);
+const storage = createLocalStorage(storageConfig);
 ```
+
+不再通过 `apps/api/src/utils.ts` 或其他兼容层回挂为全局对象。
 
 ---
 
 ## 验证标准
 
-- AI 调用（text / image / video）功能正常
-- 文件上传 / 下载功能正常
-- `pnpm lint` 通过
+- `packages/ai-providers` 和 `packages/storage` 均可独立通过 `build`、`lint`、`typecheck`
+- 文本 / 图像 / 视频调用能被上层包直接消费
+- 文件读写与 URL 解析具备直接测试覆盖
+- 依赖注入路径清晰，没有全局单例回流
 
 ---
 
-## 风险
+## 风险与注意事项
 
-| 风险点 | 说明 |
-|--------|------|
-| 全局接口导出 | `ImageConfig`、`VideoConfig` 需改为显式导出 |
-| 数据库依赖 | AI 模型配置依赖数据库，`ai-providers` 需依赖 `@toonflow/db` |
-| Electron 路径处理 | Electron 环境下的根目录路径需通过配置注入，不能硬编码 |
+- AI provider 的配置来源需要和 `packages/db` 解耦设计清楚
+- 存储路径规则要兼顾 API、MCP 与 Electron 多入口
+- 供应商 SDK 更新频率高，接口包装要避免把变更扩散到服务层

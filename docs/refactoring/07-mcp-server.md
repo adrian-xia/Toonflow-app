@@ -1,4 +1,4 @@
-# Phase 5: MCP Server
+# Phase 7: MCP Server (`apps/mcp-server`)
 
 ## 目标
 
@@ -6,7 +6,7 @@
 
 ---
 
-## 5.1 MCP Server 骨架
+## 7.1 MCP Server 骨架
 
 ### 包结构
 
@@ -31,7 +31,7 @@ apps/mcp-server/
 
 ---
 
-## 5.2 MCP Tools 定义
+## 7.2 MCP Tools 定义
 
 ### Project 工具组
 
@@ -104,7 +104,7 @@ apps/mcp-server/
 
 ---
 
-## 5.3 MCP Resources
+## 7.3 MCP Resources
 
 | URI 模式 | 说明 |
 |---|---|
@@ -115,9 +115,9 @@ apps/mcp-server/
 
 ---
 
-## 5.4 架构决策
+## 7.4 架构决策
 
-MCP Server 直接 import `@toonflow/services`，不走 HTTP，减少网络开销。
+MCP Server 优先直接组合 `@toonflow/services`；需要触发 Agent 或工作流时，再直接调用 `@toonflow/agents`、`@toonflow/workflow`，不走 HTTP。
 
 ```typescript
 // apps/mcp-server/src/server.ts
@@ -134,15 +134,17 @@ server.tool("toonflow_project_list", {}, async () => {
 
 ---
 
-## 5.5 依赖
+## 7.5 依赖
 
 - `@modelcontextprotocol/sdk`
 - `@toonflow/services`
+- `@toonflow/agents`
+- `@toonflow/workflow`
 - `@toonflow/kernel`
 
 ---
 
-## 5.6 验证标准
+## 7.6 验证标准
 
 - MCP Inspector 可连接并测试所有 tool
 - stdio 传输正常工作

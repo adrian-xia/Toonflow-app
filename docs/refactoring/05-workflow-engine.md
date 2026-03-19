@@ -1,4 +1,4 @@
-# Phase 6: 工作流引擎 (@toonflow/workflow)
+# Phase 5: 工作流引擎 (`@toonflow/workflow`)
 
 ## 目标
 
@@ -6,7 +6,7 @@
 
 ---
 
-## 6.1 状态机定义
+## 5.1 状态机定义
 
 ### 完整状态流转
 
@@ -45,7 +45,7 @@ publish_ready → published
 
 ---
 
-## 6.2 数据模型
+## 5.2 数据模型
 
 ### t_workflow_run
 
@@ -94,7 +94,7 @@ publish_ready → published
 
 ---
 
-## 6.3 WorkflowEngine 核心接口
+## 5.3 WorkflowEngine 核心接口
 
 ```typescript
 class WorkflowEngine {
@@ -138,7 +138,7 @@ interface WorkflowConfig {
 
 ---
 
-## 6.4 页面集成
+## 5.4 页面集成
 
 ### Creator Console
 
@@ -173,7 +173,7 @@ interface ReviewTaskEvent {
 
 ---
 
-## 6.5 包结构
+## 5.5 包结构
 
 ```
 packages/workflow/
@@ -195,7 +195,7 @@ packages/workflow/
 
 ---
 
-## 6.6 依赖关系
+## 5.6 依赖关系
 
 ```
 @toonflow/workflow
@@ -207,7 +207,7 @@ packages/workflow/
 
 ---
 
-## 6.7 验证标准
+## 5.7 验证标准
 
 - 工作流可从 `novel_imported` 完整推进到 `published`
 - 暂停/恢复/重试功能正常工作
