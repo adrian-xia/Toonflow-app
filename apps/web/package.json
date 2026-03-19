@@ -1,0 +1,10 @@
+{
+  "name": "@toonflow/web",
+  "private": true,
+  "scripts": {
+    "build": "node -e \"console.log('placeholder build: @toonflow/web')\"",
+    "dev": "node -e \"console.log('placeholder dev: @toonflow/web')\"",
+    "lint": "node -e \"process.exit(0)\"",
+    "typecheck": "node -e \"process.exit(0)\""
+  }
+}

@@ -1,6 +1,8 @@
 .devtools
+.worktrees/
 # dependencies (bun install)
 node_modules
+.turbo/
 
 # output
 out
@@ -35,6 +37,8 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 .DS_Store
 
 build/*
+apps/*/dist
+packages/*/dist
 
 upload/*
 uploads/*
@@ -43,6 +47,5 @@ db.sqlite
 db.sqlite-shm
 db.sqlite-wal
 
-web/*
 
 .devtools

@@ -1,0 +1,23 @@
+{
+  "name": "@toonflow/api",
+  "private": true,
+  "main": "dist/main.js",
+  "types": "dist/main.d.ts",
+  "scripts": {
+    "kernel:prepare": "pnpm --filter @toonflow/kernel exec tsc -b --force",
+    "build": "pnpm run kernel:prepare && tsc -b",
+    "dev": "pnpm run kernel:prepare && tsx watch src/main.ts",
+    "lint": "pnpm run kernel:prepare && tsc --pretty false --noEmit -p tsconfig.json && tsc --pretty false --noEmit -p tsconfig.test.json",
+    "typecheck": "pnpm run kernel:prepare && tsc --pretty false --noEmit -p tsconfig.json && tsc --pretty false --noEmit -p tsconfig.test.json",
+    "test": "pnpm run kernel:prepare && node --import tsx --test test/**/*.test.ts"
+  },
+  "dependencies": {
+    "@toonflow/kernel": "workspace:*",
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/supertest": "^6.0.3",
+    "supertest": "^7.1.1"
+  }
+}

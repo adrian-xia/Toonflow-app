@@ -1,0 +1,10 @@
+{
+  "name": "@toonflow/mcp-server",
+  "private": true,
+  "scripts": {
+    "build": "node -e \"console.log('placeholder build: @toonflow/mcp-server')\"",
+    "dev": "node -e \"console.log('placeholder dev: @toonflow/mcp-server')\"",
+    "lint": "node -e \"process.exit(0)\"",
+    "typecheck": "node -e \"process.exit(0)\""
+  }
+}
