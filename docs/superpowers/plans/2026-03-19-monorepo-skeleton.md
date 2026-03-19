@@ -103,14 +103,14 @@
 - Create: `apps/electron/package.json`
 - Create: `apps/electron/tsconfig.json`
 
-- [ ] **Step 1: 删除旧单体根实现**
+- [x] **Step 1: 删除旧单体根实现**
 
 ```bash
 rm -rf src web build
 rm -f scripts/build.ts scripts/main.ts electron-builder.yml yarn.lock web/yarn.lock
 ```
 
-- [ ] **Step 2: 将根 `package.json` 改成纯 workspace 协调器**
+- [x] **Step 2: 将根 `package.json` 改成纯 workspace 协调器**
 
 ```json
 {
@@ -132,7 +132,7 @@ rm -f scripts/build.ts scripts/main.ts electron-builder.yml yarn.lock web/yarn.l
 }
 ```
 
-- [ ] **Step 3: 新增根配置文件**
+- [x] **Step 3: 新增根配置文件**
 
 `pnpm-workspace.yaml`
 
@@ -194,7 +194,7 @@ packages:
 }
 ```
 
-- [ ] **Step 4: 为 6 个 workspace 包建立 package manifests 与 tsconfig**
+- [x] **Step 4: 为 6 个 workspace 包建立 package manifests 与 tsconfig**
 
 先确保包名精确固定：
 
@@ -233,7 +233,7 @@ packages:
 }
 ```
 
-- [ ] **Step 5: 更新 `.gitignore` 以适配 monorepo 输出**
+- [x] **Step 5: 更新 `.gitignore` 以适配 monorepo 输出**
 
 至少补上：
 
@@ -243,17 +243,17 @@ apps/*/dist
 packages/*/dist
 ```
 
-- [ ] **Step 6: 安装依赖并确认 workspace 已被识别**
+- [x] **Step 6: 安装依赖并确认 workspace 已被识别**
 
 Run: `pnpm install`  
 Expected: 生成 `pnpm-lock.yaml`，日志中出现 `Scope: all 6 workspace projects`
 
-- [ ] **Step 7: 列出 workspace 包，确认 6 个包全部注册**
+- [x] **Step 7: 列出 workspace 包，确认 6 个包全部注册**
 
 Run: `pnpm list -r --depth -1`  
 Expected: 输出中至少包含 `@toonflow/api`、`@toonflow/kernel`、`@toonflow/web`、`@toonflow/review-console`、`@toonflow/mcp-server`、`@toonflow/electron`
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add package.json pnpm-workspace.yaml turbo.json tsconfig.base.json tsconfig.json .gitignore pnpm-lock.yaml apps packages
@@ -271,7 +271,7 @@ git commit -m "chore: scaffold monorepo workspace"
 - Create: `packages/kernel/src/types/health.ts`
 - Create: `packages/kernel/test/kernel.test.ts`
 
-- [ ] **Step 1: 先写 `packages/kernel` 的失败测试，锁定响应与错误契约**
+- [x] **Step 1: 先写 `packages/kernel` 的失败测试，锁定响应与错误契约**
 
 `packages/kernel/test/kernel.test.ts`
 
@@ -301,12 +301,12 @@ test("normalizeError converts unknown values into AppError", () => {
 });
 ```
 
-- [ ] **Step 2: 运行测试，确认它先失败**
+- [x] **Step 2: 运行测试，确认它先失败**
 
 Run: `pnpm --filter @toonflow/kernel test`  
 Expected: FAIL，报错原因是 `../src` 或导出的 `ok` / `fail` / `normalizeError` 尚不存在
 
-- [ ] **Step 3: 实现 `kernel` 源码**
+- [x] **Step 3: 实现 `kernel` 源码**
 
 `packages/kernel/src/response.ts`
 
@@ -384,7 +384,7 @@ export * from "./response";
 export * from "./types/health";
 ```
 
-- [ ] **Step 4: 给 `kernel` 补齐脚本与依赖**
+- [x] **Step 4: 给 `kernel` 补齐脚本与依赖**
 
 `packages/kernel/package.json`
 
@@ -420,17 +420,17 @@ export * from "./types/health";
 }
 ```
 
-- [ ] **Step 5: 运行测试，确认契约通过**
+- [x] **Step 5: 运行测试，确认契约通过**
 
 Run: `pnpm --filter @toonflow/kernel test`  
 Expected: PASS，3 个测试全部通过
 
-- [ ] **Step 6: 运行构建与类型检查**
+- [x] **Step 6: 运行构建与类型检查**
 
 Run: `pnpm --filter @toonflow/kernel build && pnpm --filter @toonflow/kernel typecheck`  
 Expected: PASS，生成 `packages/kernel/dist/`
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add packages/kernel
@@ -448,7 +448,7 @@ git commit -m "feat: add shared kernel primitives"
 - Create: `apps/api/src/middleware/error-handler.ts`
 - Create: `apps/api/test/health.test.ts`
 
-- [ ] **Step 1: 先写健康检查失败测试**
+- [x] **Step 1: 先写健康检查失败测试**
 
 `apps/api/test/health.test.ts`
 
@@ -469,12 +469,12 @@ test("GET /health returns the kernel success envelope", async () => {
 });
 ```
 
-- [ ] **Step 2: 运行测试，确认它先失败**
+- [x] **Step 2: 运行测试，确认它先失败**
 
 Run: `pnpm --filter @toonflow/api test`  
 Expected: FAIL，报错原因是 `../src/app`、`createApp` 或 `/health` 路由尚不存在
 
-- [ ] **Step 3: 实现 `apps/api` 的最小应用壳**
+- [x] **Step 3: 实现 `apps/api` 的最小应用壳**
 
 `apps/api/src/routes/health.ts`
 
@@ -539,7 +539,7 @@ createApp().listen(port, () => {
 });
 ```
 
-- [ ] **Step 4: 给 `apps/api` 补齐依赖、脚本和 TS references**
+- [x] **Step 4: 给 `apps/api` 补齐依赖、脚本和 TS references**
 
 `apps/api/package.json`
 
@@ -583,17 +583,17 @@ createApp().listen(port, () => {
 }
 ```
 
-- [ ] **Step 5: 运行 API 测试，确认健康检查契约通过**
+- [x] **Step 5: 运行 API 测试，确认健康检查契约通过**
 
 Run: `pnpm --filter @toonflow/api test`  
 Expected: PASS，健康检查测试通过
 
-- [ ] **Step 6: 运行 API 构建与类型检查**
+- [x] **Step 6: 运行 API 构建与类型检查**
 
 Run: `pnpm --filter @toonflow/api build && pnpm --filter @toonflow/api typecheck`  
 Expected: PASS，且 `apps/api/dist/` 成功生成
 
-- [ ] **Step 7: 手动启动 API 并验证健康检查**
+- [x] **Step 7: 手动启动 API 并验证健康检查**
 
 Run: `PORT=3001 pnpm --filter @toonflow/api dev`  
 Expected: 日志输出 `[api] listening on http://127.0.0.1:3001`
@@ -612,7 +612,7 @@ Expected:
 }
 ```
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add apps/api
@@ -625,7 +625,7 @@ git commit -m "feat: add api health entrypoint"
 - Modify: `README.md`
 - Modify: `docs/refactoring/00-monorepo-skeleton.md`
 
-- [ ] **Step 1: 重写 `docs/refactoring/00-monorepo-skeleton.md`**
+- [x] **Step 1: 重写 `docs/refactoring/00-monorepo-skeleton.md`**
 
 把文档从“旧单体迁移”改成“新项目冷启动骨架”，至少同步以下结论：
 
@@ -635,7 +635,7 @@ git commit -m "feat: add api health entrypoint"
 - 工具链固定为 `pnpm workspace + turbo + TypeScript project references`
 - 旧实现冲突时直接删除，不做兼容层
 
-- [ ] **Step 2: 更新 `README.md` 的启动方式和结构说明**
+- [x] **Step 2: 更新 `README.md` 的启动方式和结构说明**
 
 至少包含：
 
@@ -646,7 +646,7 @@ git commit -m "feat: add api health entrypoint"
 - `curl http://127.0.0.1:3001/health`
 - `apps/` 与 `packages/` 的目录说明
 
-- [ ] **Step 3: 执行 Phase 0 的完整验证命令**
+- [x] **Step 3: 执行 Phase 0 的完整验证命令**
 
 Run:
 
@@ -660,7 +660,7 @@ pnpm --filter @toonflow/api test
 
 Expected: 全部 PASS，Turbo 中 6 个 workspace 包的 `build` / `lint` / `typecheck` 任务都没有失败
 
-- [ ] **Step 4: 再做一次运行态健康检查**
+- [x] **Step 4: 再做一次运行态健康检查**
 
 Run:
 
@@ -671,7 +671,7 @@ curl http://127.0.0.1:3001/health
 
 Expected: 返回 `kernel` 统一成功 envelope，且 `service` 固定为 `"api"`
 
-- [ ] **Step 5: 检查工作区，只保留预期的新结构**
+- [x] **Step 5: 检查工作区，只保留预期的新结构**
 
 Run: `git status --short`  
 Expected:
@@ -680,7 +680,7 @@ Expected:
 - 变更集中在 `apps/`、`packages/`、根配置和文档
 - 没有为了兼容旧结构保留下来的中间层文件
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add README.md docs/refactoring/00-monorepo-skeleton.md
