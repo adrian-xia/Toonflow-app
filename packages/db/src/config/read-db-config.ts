@@ -15,22 +15,44 @@ const DEFAULT_POOL_ACQUIRE_TIMEOUT_MS = 60000;
 
 function requiredValue(env: EnvMap, key: string): string {
   const value = env[key];
-  if (!value) {
+  if (value === undefined) {
     throw new Error(`Missing required database environment variable: ${key}`);
   }
 
   return value;
 }
 
-function parseNumber(env: EnvMap, key: string, fallback: number): number {
+interface ParseIntegerOptions {
+  min?: number;
+  max?: number;
+}
+
+function parseInteger(
+  env: EnvMap,
+  key: string,
+  fallback: number,
+  options: ParseIntegerOptions = {}
+): number {
   const raw = env[key];
   if (raw === undefined || raw === "") {
     return fallback;
   }
 
   const value = Number(raw);
-  if (!Number.isFinite(value)) {
-    throw new Error(`Database environment variable must be a number: ${key}`);
+  if (!Number.isInteger(value)) {
+    throw new Error(`Database environment variable must be an integer: ${key}`);
+  }
+
+  if (options.min !== undefined && value < options.min) {
+    throw new Error(
+      `Database environment variable must be >= ${options.min}: ${key}`
+    );
+  }
+
+  if (options.max !== undefined && value > options.max) {
+    throw new Error(
+      `Database environment variable must be <= ${options.max}: ${key}`
+    );
   }
 
   return value;
@@ -42,15 +64,18 @@ function parseBoolean(env: EnvMap, key: string, fallback: boolean): boolean {
     return fallback;
   }
 
-  if (raw === "true") {
+  const normalized = raw.trim().toLowerCase();
+  if (normalized === "true" || normalized === "1") {
     return true;
   }
 
-  if (raw === "false") {
+  if (normalized === "false" || normalized === "0") {
     return false;
   }
 
-  throw new Error(`Database environment variable must be true or false: ${key}`);
+  throw new Error(
+    `Database environment variable must be true/false or 1/0: ${key}`
+  );
 }
 
 export function readDbConfig(env: EnvMap, options: ReadDbConfigOptions): DbConfig {
@@ -59,24 +84,26 @@ export function readDbConfig(env: EnvMap, options: ReadDbConfigOptions): DbConfi
 
   return {
     host: requiredValue(env, key("HOST")),
-    port: parseNumber(env, key("PORT"), DEFAULT_PORT),
+    port: parseInteger(env, key("PORT"), DEFAULT_PORT, { min: 1, max: 65535 }),
     user: requiredValue(env, key("USER")),
     password: requiredValue(env, key("PASSWORD")),
     database: requiredValue(env, key("NAME")),
     schema: requiredValue(env, key("SCHEMA")),
     ssl: parseBoolean(env, key("SSL"), DEFAULT_SSL),
     pool: {
-      min: parseNumber(env, key("POOL_MIN"), DEFAULT_POOL_MIN),
-      max: parseNumber(env, key("POOL_MAX"), DEFAULT_POOL_MAX),
-      idleTimeoutMillis: parseNumber(
+      min: parseInteger(env, key("POOL_MIN"), DEFAULT_POOL_MIN, { min: 0 }),
+      max: parseInteger(env, key("POOL_MAX"), DEFAULT_POOL_MAX, { min: 0 }),
+      idleTimeoutMillis: parseInteger(
         env,
         key("POOL_IDLE_TIMEOUT_MS"),
-        DEFAULT_POOL_IDLE_TIMEOUT_MS
+        DEFAULT_POOL_IDLE_TIMEOUT_MS,
+        { min: 0 }
       ),
-      acquireTimeoutMillis: parseNumber(
+      acquireTimeoutMillis: parseInteger(
         env,
         key("POOL_ACQUIRE_TIMEOUT_MS"),
-        DEFAULT_POOL_ACQUIRE_TIMEOUT_MS
+        DEFAULT_POOL_ACQUIRE_TIMEOUT_MS,
+        { min: 0 }
       )
     }
   };

@@ -91,3 +91,130 @@ test("readDbConfig supports TEST_DB_* prefix", () => {
     }
   });
 });
+
+test("readDbConfig allows an intentionally empty DB_PASSWORD", () => {
+  const config = readDbConfig(
+    {
+      DB_HOST: "127.0.0.1",
+      DB_USER: "postgres",
+      DB_PASSWORD: "",
+      DB_NAME: "toonflow",
+      DB_SCHEMA: "toonflow_app"
+    },
+    { prefix: "DB" }
+  );
+
+  assert.equal(config.password, "");
+});
+
+test("readDbConfig rejects non-integer DB_PORT values", () => {
+  assert.throws(
+    () =>
+      readDbConfig(
+        {
+          DB_HOST: "127.0.0.1",
+          DB_USER: "postgres",
+          DB_PASSWORD: "postgres",
+          DB_NAME: "toonflow",
+          DB_SCHEMA: "toonflow_app",
+          DB_PORT: "5432.5"
+        },
+        { prefix: "DB" }
+      ),
+    /DB_PORT/
+  );
+});
+
+test("readDbConfig rejects out-of-range DB_PORT values", () => {
+  assert.throws(
+    () =>
+      readDbConfig(
+        {
+          DB_HOST: "127.0.0.1",
+          DB_USER: "postgres",
+          DB_PASSWORD: "postgres",
+          DB_NAME: "toonflow",
+          DB_SCHEMA: "toonflow_app",
+          DB_PORT: "0"
+        },
+        { prefix: "DB" }
+      ),
+    /DB_PORT/
+  );
+});
+
+test("readDbConfig rejects negative pool/timeouts", () => {
+  assert.throws(
+    () =>
+      readDbConfig(
+        {
+          DB_HOST: "127.0.0.1",
+          DB_USER: "postgres",
+          DB_PASSWORD: "postgres",
+          DB_NAME: "toonflow",
+          DB_SCHEMA: "toonflow_app",
+          DB_POOL_MIN: "-1"
+        },
+        { prefix: "DB" }
+      ),
+    /DB_POOL_MIN/
+  );
+
+  assert.throws(
+    () =>
+      readDbConfig(
+        {
+          DB_HOST: "127.0.0.1",
+          DB_USER: "postgres",
+          DB_PASSWORD: "postgres",
+          DB_NAME: "toonflow",
+          DB_SCHEMA: "toonflow_app",
+          DB_POOL_IDLE_TIMEOUT_MS: "-100"
+        },
+        { prefix: "DB" }
+      ),
+    /DB_POOL_IDLE_TIMEOUT_MS/
+  );
+});
+
+test("readDbConfig parses DB_SSL with trimmed, case-insensitive, and numeric values", () => {
+  const trueConfig = readDbConfig(
+    {
+      DB_HOST: "127.0.0.1",
+      DB_USER: "postgres",
+      DB_PASSWORD: "postgres",
+      DB_NAME: "toonflow",
+      DB_SCHEMA: "toonflow_app",
+      DB_SSL: " TrUe "
+    },
+    { prefix: "DB" }
+  );
+
+  const falseConfig = readDbConfig(
+    {
+      DB_HOST: "127.0.0.1",
+      DB_USER: "postgres",
+      DB_PASSWORD: "postgres",
+      DB_NAME: "toonflow",
+      DB_SCHEMA: "toonflow_app",
+      DB_SSL: "0"
+    },
+    { prefix: "DB" }
+  );
+
+  const numericTrueConfig = readDbConfig(
+    {
+      DB_HOST: "127.0.0.1",
+      DB_USER: "postgres",
+      DB_PASSWORD: "postgres",
+      DB_NAME: "toonflow",
+      DB_SCHEMA: "toonflow_app",
+      DB_SSL: "1"
+    },
+    { prefix: "DB" }
+  );
+
+  assert.equal(trueConfig.ssl, true);
+  assert.equal(falseConfig.ssl, false);
+  assert.equal(numericTrueConfig.ssl, true);
+});

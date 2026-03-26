@@ -1,8 +1,19 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { Knex } from "knex";
 
 import { DbConfig } from "../src/config/db-config";
 import { createDbClient } from "../src/index";
+
+interface TestTransaction {
+  commit: () => Promise<void>;
+  rollback: () => Promise<void>;
+}
+
+interface TestExecutor {
+  destroy: () => Promise<void>;
+  transaction: () => Promise<TestTransaction>;
+}
 
 const baseConfig: DbConfig = {
   host: "127.0.0.1",
@@ -22,15 +33,19 @@ const baseConfig: DbConfig = {
 
 test("createDbClient returns executor, destroy, and transaction", () => {
   let receivedConfig: unknown;
-  const executor = {
+  const executor: TestExecutor = {
     destroy: async () => undefined,
-    transaction: async () => undefined
+    transaction: async () =>
+      ({
+        commit: async () => undefined,
+        rollback: async () => undefined
+      }) satisfies TestTransaction
   };
 
   const db = createDbClient(baseConfig, {
     createExecutor: (config) => {
       receivedConfig = config;
-      return executor;
+      return executor as unknown as Knex;
     }
   });
 
@@ -63,7 +78,7 @@ test("createDbClient returns executor, destroy, and transaction", () => {
 test("transaction commits on success", async () => {
   let committed = false;
   let rolledBack = false;
-  const trx = {
+  const trx: TestTransaction = {
     commit: async () => {
       committed = true;
     },
@@ -72,13 +87,13 @@ test("transaction commits on success", async () => {
     }
   };
 
-  const executor = {
+  const executor: TestExecutor = {
     destroy: async () => undefined,
     transaction: async () => trx
   };
 
   const db = createDbClient(baseConfig, {
-    createExecutor: () => executor
+    createExecutor: () => executor as unknown as Knex
   });
 
   const result = await db.transaction(async () => "ok");
@@ -91,7 +106,7 @@ test("transaction commits on success", async () => {
 test("transaction rolls back and rethrows on error", async () => {
   let committed = false;
   let rolledBack = false;
-  const trx = {
+  const trx: TestTransaction = {
     commit: async () => {
       committed = true;
     },
@@ -100,13 +115,13 @@ test("transaction rolls back and rethrows on error", async () => {
     }
   };
 
-  const executor = {
+  const executor: TestExecutor = {
     destroy: async () => undefined,
     transaction: async () => trx
   };
 
   const db = createDbClient(baseConfig, {
-    createExecutor: () => executor
+    createExecutor: () => executor as unknown as Knex
   });
 
   await assert.rejects(
@@ -122,20 +137,20 @@ test("transaction rolls back and rethrows on error", async () => {
 });
 
 test("transaction rethrows callback error even if rollback fails", async () => {
-  const trx = {
+  const trx: TestTransaction = {
     commit: async () => undefined,
     rollback: async () => {
       throw new Error("rollback failed");
     }
   };
 
-  const executor = {
+  const executor: TestExecutor = {
     destroy: async () => undefined,
     transaction: async () => trx
   };
 
   const db = createDbClient(baseConfig, {
-    createExecutor: () => executor
+    createExecutor: () => executor as unknown as Knex
   });
 
   await assert.rejects(
