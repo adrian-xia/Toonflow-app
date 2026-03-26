@@ -32,6 +32,7 @@ test("migrations can run, roll back latest batch, and replay", async () => {
 
     assert.equal(await database.tableExists("projects"), true);
     assert.equal(await database.tableExists("knex_migrations"), true);
+    assert.equal(await database.tableExists("knex_migrations_lock"), true);
 
     const batchAfterFirstMigrate = await database.latestBatchNumber();
     assert.equal(typeof batchAfterFirstMigrate, "number");
