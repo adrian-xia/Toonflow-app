@@ -19,7 +19,7 @@ export function buildKnexConfig(config: DbConfig): Knex.Config {
       idleTimeoutMillis: config.pool.idleTimeoutMillis,
       acquireTimeoutMillis: config.pool.acquireTimeoutMillis
     },
-    searchPath: [config.schema],
+    searchPath: config.schema,
     migrations: {
       schemaName: config.schema
     }

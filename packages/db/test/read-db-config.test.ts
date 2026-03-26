@@ -32,20 +32,29 @@ test("readDbConfig parses DB_* env into a DbConfig object", () => {
   });
 });
 
-test("readDbConfig throws when required DB_* variables are missing", () => {
-  assert.throws(
-    () =>
-      readDbConfig(
-        {
-          DB_USER: "postgres",
-          DB_PASSWORD: "postgres",
-          DB_NAME: "toonflow",
-          DB_SCHEMA: "toonflow_app"
-        },
-        { prefix: "DB" }
-      ),
-    /DB_HOST/
-  );
+test("readDbConfig enforces required DB_* variables", () => {
+  const env = {
+    DB_HOST: "127.0.0.1",
+    DB_USER: "postgres",
+    DB_PASSWORD: "postgres",
+    DB_NAME: "toonflow",
+    DB_SCHEMA: "toonflow_app"
+  };
+
+  const requiredKeys = [
+    "DB_HOST",
+    "DB_USER",
+    "DB_PASSWORD",
+    "DB_NAME",
+    "DB_SCHEMA"
+  ] as const;
+
+  for (const key of requiredKeys) {
+    const nextEnv: Record<string, string> = { ...env };
+    delete nextEnv[key];
+
+    assert.throws(() => readDbConfig(nextEnv, { prefix: "DB" }), new RegExp(key));
+  }
 });
 
 test("readDbConfig supports TEST_DB_* prefix", () => {
@@ -82,4 +91,3 @@ test("readDbConfig supports TEST_DB_* prefix", () => {
     }
   });
 });
-

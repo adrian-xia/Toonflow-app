@@ -53,7 +53,7 @@ test("createDbClient returns executor, destroy, and transaction", () => {
       idleTimeoutMillis: 30000,
       acquireTimeoutMillis: 60000
     },
-    searchPath: ["toonflow_app"],
+    searchPath: "toonflow_app",
     migrations: {
       schemaName: "toonflow_app"
     }
@@ -119,4 +119,30 @@ test("transaction rolls back and rethrows on error", async () => {
 
   assert.equal(committed, false);
   assert.equal(rolledBack, true);
+});
+
+test("transaction rethrows callback error even if rollback fails", async () => {
+  const trx = {
+    commit: async () => undefined,
+    rollback: async () => {
+      throw new Error("rollback failed");
+    }
+  };
+
+  const executor = {
+    destroy: async () => undefined,
+    transaction: async () => trx
+  };
+
+  const db = createDbClient(baseConfig, {
+    createExecutor: () => executor
+  });
+
+  await assert.rejects(
+    () =>
+      db.transaction(async () => {
+        throw new Error("original callback error");
+      }),
+    /original callback error/
+  );
 });

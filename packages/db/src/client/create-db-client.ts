@@ -28,7 +28,11 @@ export function createDbClient(
         await trx.commit();
         return result;
       } catch (error) {
-        await trx.rollback();
+        try {
+          await trx.rollback();
+        } catch {
+          // Preserve the original callback error as the transaction contract requires.
+        }
         throw error;
       }
     }
