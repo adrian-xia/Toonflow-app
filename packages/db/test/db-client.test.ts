@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { Knex } from "knex";
+import type { Knex } from "knex";
 
 import { DbConfig } from "../src/config/db-config";
 import { createDbClient } from "../src/index";

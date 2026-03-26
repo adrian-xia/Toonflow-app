@@ -107,6 +107,68 @@ test("readDbConfig allows an intentionally empty DB_PASSWORD", () => {
   assert.equal(config.password, "");
 });
 
+test("readDbConfig rejects empty DB_HOST, DB_USER, DB_NAME, and DB_SCHEMA", () => {
+  assert.throws(
+    () =>
+      readDbConfig(
+        {
+          DB_HOST: "",
+          DB_USER: "postgres",
+          DB_PASSWORD: "postgres",
+          DB_NAME: "toonflow",
+          DB_SCHEMA: "toonflow_app"
+        },
+        { prefix: "DB" }
+      ),
+    /DB_HOST/
+  );
+
+  assert.throws(
+    () =>
+      readDbConfig(
+        {
+          DB_HOST: "127.0.0.1",
+          DB_USER: "",
+          DB_PASSWORD: "postgres",
+          DB_NAME: "toonflow",
+          DB_SCHEMA: "toonflow_app"
+        },
+        { prefix: "DB" }
+      ),
+    /DB_USER/
+  );
+
+  assert.throws(
+    () =>
+      readDbConfig(
+        {
+          DB_HOST: "127.0.0.1",
+          DB_USER: "postgres",
+          DB_PASSWORD: "postgres",
+          DB_NAME: "",
+          DB_SCHEMA: "toonflow_app"
+        },
+        { prefix: "DB" }
+      ),
+    /DB_NAME/
+  );
+
+  assert.throws(
+    () =>
+      readDbConfig(
+        {
+          DB_HOST: "127.0.0.1",
+          DB_USER: "postgres",
+          DB_PASSWORD: "postgres",
+          DB_NAME: "toonflow",
+          DB_SCHEMA: ""
+        },
+        { prefix: "DB" }
+      ),
+    /DB_SCHEMA/
+  );
+});
+
 test("readDbConfig rejects non-integer DB_PORT values", () => {
   assert.throws(
     () =>
@@ -174,6 +236,25 @@ test("readDbConfig rejects negative pool/timeouts", () => {
         { prefix: "DB" }
       ),
     /DB_POOL_IDLE_TIMEOUT_MS/
+  );
+});
+
+test("readDbConfig rejects DB_POOL_MIN greater than DB_POOL_MAX", () => {
+  assert.throws(
+    () =>
+      readDbConfig(
+        {
+          DB_HOST: "127.0.0.1",
+          DB_USER: "postgres",
+          DB_PASSWORD: "postgres",
+          DB_NAME: "toonflow",
+          DB_SCHEMA: "toonflow_app",
+          DB_POOL_MIN: "11",
+          DB_POOL_MAX: "10"
+        },
+        { prefix: "DB" }
+      ),
+    /DB_POOL_MIN.*DB_POOL_MAX|DB_POOL_MAX.*DB_POOL_MIN/
   );
 });
 

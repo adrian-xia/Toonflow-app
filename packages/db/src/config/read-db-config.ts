@@ -22,6 +22,15 @@ function requiredValue(env: EnvMap, key: string): string {
   return value;
 }
 
+function requiredNonEmptyValue(env: EnvMap, key: string): string {
+  const value = requiredValue(env, key);
+  if (value === "") {
+    throw new Error(`Database environment variable cannot be empty: ${key}`);
+  }
+
+  return value;
+}
+
 interface ParseIntegerOptions {
   min?: number;
   max?: number;
@@ -81,18 +90,26 @@ function parseBoolean(env: EnvMap, key: string, fallback: boolean): boolean {
 export function readDbConfig(env: EnvMap, options: ReadDbConfigOptions): DbConfig {
   const { prefix } = options;
   const key = (name: string) => `${prefix}_${name}`;
+  const poolMin = parseInteger(env, key("POOL_MIN"), DEFAULT_POOL_MIN, { min: 0 });
+  const poolMax = parseInteger(env, key("POOL_MAX"), DEFAULT_POOL_MAX, { min: 0 });
+
+  if (poolMin > poolMax) {
+    throw new Error(
+      `Database environment variable DB_POOL_MIN must be <= DB_POOL_MAX`
+    );
+  }
 
   return {
-    host: requiredValue(env, key("HOST")),
+    host: requiredNonEmptyValue(env, key("HOST")),
     port: parseInteger(env, key("PORT"), DEFAULT_PORT, { min: 1, max: 65535 }),
-    user: requiredValue(env, key("USER")),
+    user: requiredNonEmptyValue(env, key("USER")),
     password: requiredValue(env, key("PASSWORD")),
-    database: requiredValue(env, key("NAME")),
-    schema: requiredValue(env, key("SCHEMA")),
+    database: requiredNonEmptyValue(env, key("NAME")),
+    schema: requiredNonEmptyValue(env, key("SCHEMA")),
     ssl: parseBoolean(env, key("SSL"), DEFAULT_SSL),
     pool: {
-      min: parseInteger(env, key("POOL_MIN"), DEFAULT_POOL_MIN, { min: 0 }),
-      max: parseInteger(env, key("POOL_MAX"), DEFAULT_POOL_MAX, { min: 0 }),
+      min: poolMin,
+      max: poolMax,
       idleTimeoutMillis: parseInteger(
         env,
         key("POOL_IDLE_TIMEOUT_MS"),
