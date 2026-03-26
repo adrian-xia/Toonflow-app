@@ -12,6 +12,7 @@
     "db:migrate": "tsx scripts/migrate.ts",
     "db:rollback": "tsx scripts/rollback.ts",
     "db:types": "tsx scripts/generate-db-types.ts",
+    "db:test:migration": "node --import tsx --test --test-concurrency=1 test/migration.test.ts",
     "db:test:up": "docker compose -f docker-compose.test.yml up -d",
     "db:test:down": "docker compose -f docker-compose.test.yml down -v"
   },

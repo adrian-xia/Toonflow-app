@@ -2,7 +2,27 @@ import { Knex } from "knex";
 
 import { DbConfig } from "../config/db-config";
 
-export function buildKnexConfig(config: DbConfig): Knex.Config {
+export interface BuildKnexConfigOptions {
+  migrationsDirectory?: string;
+  migrationsExtension?: string;
+}
+
+export function buildKnexConfig(
+  config: DbConfig,
+  options: BuildKnexConfigOptions = {}
+): Knex.Config {
+  const migrations: Knex.MigratorConfig = {
+    schemaName: config.schema
+  };
+
+  if (options.migrationsDirectory) {
+    migrations.directory = options.migrationsDirectory;
+  }
+
+  if (options.migrationsExtension) {
+    migrations.extension = options.migrationsExtension;
+  }
+
   return {
     client: "pg",
     connection: {
@@ -20,8 +40,6 @@ export function buildKnexConfig(config: DbConfig): Knex.Config {
       acquireTimeoutMillis: config.pool.acquireTimeoutMillis
     },
     searchPath: config.schema,
-    migrations: {
-      schemaName: config.schema
-    }
+    migrations
   };
 }
