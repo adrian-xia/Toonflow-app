@@ -105,7 +105,68 @@ const serviceDeps = {
 
 ## 8. `@toonflow/ai-providers` 设计
 
-> 本节由 Task 3 补充。
+### 8.1 包职责与边界
+
+`@toonflow/ai-providers` 在 Phase 2 中只负责以下事项：
+
+- `text` / `image` / `video` 三类能力的统一抽象。
+- 厂商 SDK 差异适配与 provider 封装。
+- provider registry 的注册、查找与实例解析。
+- 统一 request / result / stream 语义，避免上层直接处理厂商事件细节。
+
+`@toonflow/ai-providers` 不负责以下事项：
+
+- 配置持久化（例如数据库存储 provider 配置）。
+- 业务路由策略（例如场景级默认模型选择与 fallback 策略）。
+- 工作流编排或任务级调度。
+- HTTP / MCP / Web UI / Electron 等传输层接入。
+
+### 8.2 Phase 2 能力基线
+
+- `text`：必须提供真实可运行实现。
+- `image`：必须提供真实可运行实现。
+- `video`：只定义接口、类型与 registry 扩展位，不要求首批接入真实厂商。
+
+### 8.3 建议目录结构
+
+```text
+packages/ai-providers/
+├── src/
+│   ├── index.ts
+│   ├── config/
+│   ├── registry/
+│   ├── errors/
+│   ├── text/
+│   ├── image/
+│   ├── video/
+│   └── providers/
+│       └── <vendor>/
+```
+
+### 8.4 稳定公共导出面
+
+`@toonflow/ai-providers` 需要长期稳定暴露以下导出：
+
+- `createAiProviderRegistry(...)`
+- `AiProviderRegistry`
+- `TextProvider`
+- `ImageProvider`
+- `VideoProvider`
+- 各模态共享的 request / result / stream chunk 类型
+
+### 8.5 配置模型与注册装配约束
+
+- provider 包只接受结构化配置对象，不在包内直接读取 `process.env`。
+- 边缘层可以提供 `env -> config` 的解析函数，但解析过程不能替代业务默认值决策。
+- registry 装配只负责接收 provider 实例并提供解析能力，不承担配置持久化或场景路由策略。
+- 默认 provider 的业务选择由上层组合层决定，不固化在 `@toonflow/ai-providers` 包内。
+
+### 8.6 `TextProvider.stream()` 与流式语义约束
+
+- `TextProvider.stream()` 是 Phase 2 正式要求，不是预留接口。
+- 流式调用采用 provider-neutral 的异步消费模型，调用方通过统一的异步迭代结果读取增量输出。
+- 公共 API 不暴露厂商 SDK 的事件类型、回调签名或连接对象，SDK 事件形态必须在 provider 内部完成映射。
+- `invoke()` 与 `stream()` 必须共享同一请求边界与主要错误语义，避免上层按厂商分支处理。
 
 ## 9. `@toonflow/storage` 设计
 

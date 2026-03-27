@@ -184,7 +184,7 @@ git commit -m "docs: scaffold phase 2 detailed spec"
 - Modify: `docs/refactoring/02-ai-providers-storage-spec.md`
 - Reference: `docs/superpowers/specs/2026-03-27-ai-providers-storage-design.md`
 
-- [ ] **Step 1: Write the `@toonflow/ai-providers` responsibility and baseline sections**
+- [x] **Step 1: Write the `@toonflow/ai-providers` responsibility and baseline sections**
 
 The package section must explicitly state:
 
@@ -194,7 +194,7 @@ The package section must explicitly state:
 - baseline: real implementations for `text` and `image`; `video` is interface-and-registry only
 ```
 
-- [ ] **Step 2: Add the recommended directory layout and public API surface**
+- [x] **Step 2: Add the recommended directory layout and public API surface**
 
 Include a code block equivalent to:
 
@@ -223,7 +223,7 @@ Then list the stable exports:
 - request / result / stream chunk types
 ```
 
-- [ ] **Step 3: Add config, registry wiring, and `stream()` behavior requirements**
+- [x] **Step 3: Add config, registry wiring, and `stream()` behavior requirements**
 
 Required details:
 
@@ -235,7 +235,7 @@ Required details:
 - vendor SDK event shapes must not leak into public API
 ```
 
-- [ ] **Step 4: Verify the AI provider section covers the approved baseline**
+- [x] **Step 4: Verify the AI provider section covers the approved baseline**
 
 Run:
 
@@ -248,7 +248,7 @@ Expected:
 - the text/image/video baseline is explicit
 - `stream()` behavior is described in prose, not just named in an interface list
 
-- [ ] **Step 5: Commit the AI provider spec content**
+- [x] **Step 5: Commit the AI provider spec content**
 
 ```bash
 git add docs/refactoring/02-ai-providers-storage-spec.md
