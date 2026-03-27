@@ -1,10 +1,9 @@
 import { randomUUID } from "node:crypto";
 
 import { DbExecutor } from "../client/types";
-import {
-  PROJECTS_TABLE,
-  ProjectStatus
-} from "../schema/tables/projects";
+import { PROJECTS_TABLE } from "../schema/tables/projects";
+
+export type ProjectStatus = "draft" | "archived";
 
 export interface ProjectRecord {
   id: string;
