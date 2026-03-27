@@ -59,7 +59,7 @@
 - Modify: `package.json`
 - Modify: `tsconfig.json`
 
-- [ ] **Step 1: Create a failing public API smoke test**
+- [x] **Step 1: Create a failing public API smoke test**
 
 ```ts
 import test from "node:test";
@@ -76,12 +76,12 @@ test("db package exposes the phase-1 public API entry points", () => {
 });
 ```
 
-- [ ] **Step 2: Run the package test to verify it fails**
+- [x] **Step 2: Run the package test to verify it fails**
 
 Run: `pnpm --filter @toonflow/db test`
 Expected: FAIL because `@toonflow/db` package files or exports do not exist yet.
 
-- [ ] **Step 3: Add the workspace package skeleton and root wiring**
+- [x] **Step 3: Add the workspace package skeleton and root wiring**
 
 Create `packages/db/package.json` with scripts:
 
@@ -113,7 +113,7 @@ Create `packages/db/package.json` with scripts:
 
 Update root `tsconfig.json` references to include `./packages/db`.
 
-- [ ] **Step 4: Export minimal placeholders from `src/index.ts`**
+- [x] **Step 4: Export minimal placeholders from `src/index.ts`**
 
 ```ts
 export function readDbConfig() {
@@ -125,12 +125,12 @@ export function createDbClient() {
 }
 ```
 
-- [ ] **Step 5: Run the smoke test to verify it passes**
+- [x] **Step 5: Run the smoke test to verify it passes**
 
 Run: `pnpm --filter @toonflow/db test -- --test-name-pattern "public API"`
 Expected: PASS for the smoke test.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add package.json tsconfig.json packages/db
@@ -149,7 +149,7 @@ git commit -m "feat: scaffold toonflow db package"
 - Create: `packages/db/test/db-client.test.ts`
 - Modify: `packages/db/src/index.ts`
 
-- [ ] **Step 1: Write failing config parsing tests**
+- [x] **Step 1: Write failing config parsing tests**
 
 Include tests for:
 - required `DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`, `DB_SCHEMA`
@@ -189,12 +189,12 @@ test("readDbConfig parses DB_* env into a DbConfig object", () => {
 });
 ```
 
-- [ ] **Step 2: Run config tests to verify they fail**
+- [x] **Step 2: Run config tests to verify they fail**
 
 Run: `pnpm --filter @toonflow/db test -- test/read-db-config.test.ts`
 Expected: FAIL because config parsing is not implemented yet.
 
-- [ ] **Step 3: Implement `DbConfig`, `readDbConfig`, `DbExecutor`, and `buildKnexConfig`**
+- [x] **Step 3: Implement `DbConfig`, `readDbConfig`, `DbExecutor`, and `buildKnexConfig`**
 
 Required behavior:
 - `DbConfig` matches the approved spec exactly
@@ -202,7 +202,7 @@ Required behavior:
 - migrations metadata table is configured with `schemaName: config.schema`
 - `DbExecutor = Knex | Knex.Transaction`
 
-- [ ] **Step 4: Write the failing `DbClient` tests**
+- [x] **Step 4: Write the failing `DbClient` tests**
 
 Cover:
 - `createDbClient(config)` returns `{ executor, destroy, transaction }`
@@ -220,12 +220,12 @@ await assert.rejects(
 );
 ```
 
-- [ ] **Step 5: Run the `DbClient` tests to verify they fail**
+- [x] **Step 5: Run the `DbClient` tests to verify they fail**
 
 Run: `pnpm --filter @toonflow/db test -- test/db-client.test.ts`
 Expected: FAIL because client and transaction behavior are still missing.
 
-- [ ] **Step 6: Implement `createDbClient` and wire the public API**
+- [x] **Step 6: Implement `createDbClient` and wire the public API**
 
 Implementation requirements:
 - expose `executor: Knex`
@@ -233,7 +233,7 @@ Implementation requirements:
 - `transaction(fn)` wraps Knex transaction, commits on resolved callback, rolls back on thrown error, and rethrows the original error
 - `src/index.ts` exports config/client contracts
 
-- [ ] **Step 7: Run targeted tests to verify green**
+- [x] **Step 7: Run targeted tests to verify green**
 
 Run:
 - `pnpm --filter @toonflow/db test -- test/read-db-config.test.ts`
@@ -241,7 +241,7 @@ Run:
 
 Expected: PASS for both files.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add packages/db/src packages/db/test
@@ -260,7 +260,7 @@ git commit -m "feat: add db config and client contracts"
 - Modify: `packages/db/package.json`
 - Modify: `packages/db/src/client/knex-config.ts`
 
-- [ ] **Step 1: Write a failing migration integration test**
+- [x] **Step 1: Write a failing migration integration test**
 
 Test flow:
 1. assume test PostgreSQL is already running
@@ -270,7 +270,7 @@ Test flow:
 5. verify the latest migration batch was rolled back
 6. run `db:migrate` again to confirm replay works
 
-- [ ] **Step 2: Run the migration test to verify it fails**
+- [x] **Step 2: Run the migration test to verify it fails**
 
 Run:
 - `pnpm --filter @toonflow/db db:test:up`
@@ -279,7 +279,7 @@ Run:
 
 Expected: FAIL because scripts/test utils are not implemented yet.
 
-- [ ] **Step 3: Implement the test harness and scripts**
+- [x] **Step 3: Implement the test harness and scripts**
 
 Required behavior:
 - `docker-compose.test.yml` uses `postgres:16`
@@ -299,19 +299,19 @@ pnpm --filter @toonflow/db test
 pnpm --filter @toonflow/db db:test:down
 ```
 
-- [ ] **Step 4: Re-run the migration integration test**
+- [x] **Step 4: Re-run the migration integration test**
 
 Run:
 - `pnpm --filter @toonflow/db test -- test/migration.test.ts`
 
 Expected: PASS, including the `migrate -> rollback -> migrate` sequence.
 
-- [ ] **Step 5: Shut down the test database after verification**
+- [x] **Step 5: Shut down the test database after verification**
 
 Run: `pnpm --filter @toonflow/db db:test:down`
 Expected: container stops and volumes are removed cleanly.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add packages/db/docker-compose.test.yml packages/db/scripts packages/db/src/test-utils packages/db/test/migration.test.ts packages/db/knexfile.ts packages/db/package.json
@@ -333,7 +333,7 @@ git commit -m "feat: add db migration scripts and test harness"
 - Create: `packages/db/test/generate-db-types.test.ts`
 - Modify: `packages/db/src/index.ts`
 
-- [ ] **Step 1: Write the failing repository integration test**
+- [x] **Step 1: Write the failing repository integration test**
 
 Cover:
 - insert a project row
@@ -354,7 +354,7 @@ const found = await repo.getById(created.id);
 assert.equal(found?.title, "Pilot");
 ```
 
-- [ ] **Step 2: Write the failing type generation test**
+- [x] **Step 2: Write the failing type generation test**
 
 Assert that running `db:types` produces:
 - `ProjectRow`
@@ -367,7 +367,7 @@ Assert that running `db:types` produces:
 
 Run the codegen script inside the test and inspect `src/types/generated.ts`.
 
-- [ ] **Step 3: Run the repository and typegen tests to verify they fail**
+- [x] **Step 3: Run the repository and typegen tests to verify they fail**
 
 Run:
 - `pnpm --filter @toonflow/db db:test:up`
@@ -377,7 +377,7 @@ Run:
 
 Expected: FAIL because schema, repository, and codegen are not implemented yet.
 
-- [ ] **Step 4: Implement the schema, migration, repository, and generator**
+- [x] **Step 4: Implement the schema, migration, repository, and generator**
 
 Required behavior:
 - `projects` table uses `snake_case`, UUID/string id, `created_at`, `updated_at`
@@ -395,7 +395,7 @@ Required behavior:
   - `Insert` types keep `snake_case` field names and make DB-default columns optional
   - `Update` types exclude immutable columns such as `id`, `created_at`, `updated_at`
 
-- [ ] **Step 5: Run targeted tests until green**
+- [x] **Step 5: Run targeted tests until green**
 
 Run:
 - `pnpm --filter @toonflow/db test -- test/project-repository.test.ts`
@@ -404,7 +404,7 @@ Run:
 
 Expected: PASS for tests and regenerated `src/types/generated.ts`.
 
-- [ ] **Step 6: Run package and workspace verification**
+- [x] **Step 6: Run package and workspace verification**
 
 Run:
 - `pnpm --filter @toonflow/db build`
@@ -419,7 +419,7 @@ Run:
 
 Expected: all commands exit 0.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add package.json tsconfig.json packages/db
