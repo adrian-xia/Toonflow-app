@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 
 export function runDbCommand(
-  command: "db:migrate" | "db:rollback",
+  command: "db:migrate" | "db:rollback" | "db:types",
   env: NodeJS.ProcessEnv
 ) {
   const result = spawnSync(
