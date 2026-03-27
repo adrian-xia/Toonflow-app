@@ -1,6 +1,7 @@
 import path from "node:path";
 
-import { buildKnexConfig, readDbConfig } from "./src";
+import { buildKnexConfig } from "./src/client/knex-config";
+import { readDbConfig } from "./src/config/read-db-config";
 
 const config = readDbConfig(process.env, { prefix: "DB" });
 

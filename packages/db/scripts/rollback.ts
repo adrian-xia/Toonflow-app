@@ -1,7 +1,8 @@
 import path from "node:path";
 import knex from "knex";
 
-import { buildKnexConfig, readDbConfig } from "../src";
+import { buildKnexConfig } from "../src/client/knex-config";
+import { readDbConfig } from "../src/config/read-db-config";
 
 const MIGRATIONS_DIRECTORY = path.resolve(__dirname, "../src/migrations");
 

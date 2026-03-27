@@ -22,8 +22,12 @@ beforeEach(async () => {
 });
 
 after(async () => {
-  await db.destroy();
-  await database.destroy();
+  if (db) {
+    await db.destroy();
+  }
+  if (database) {
+    await database.destroy();
+  }
 });
 
 test("project repository inserts and fetches a project by id", async () => {
