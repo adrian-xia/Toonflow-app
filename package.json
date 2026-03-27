@@ -6,7 +6,12 @@
     "dev": "pnpm --filter @toonflow/api dev",
     "build": "turbo run build",
     "lint": "turbo run lint",
-    "typecheck": "turbo run typecheck"
+    "typecheck": "turbo run typecheck",
+    "db:migrate": "pnpm --filter @toonflow/db db:migrate",
+    "db:rollback": "pnpm --filter @toonflow/db db:rollback",
+    "db:types": "pnpm --filter @toonflow/db db:types",
+    "db:test:up": "pnpm --filter @toonflow/db db:test:up",
+    "db:test:down": "pnpm --filter @toonflow/db db:test:down"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
