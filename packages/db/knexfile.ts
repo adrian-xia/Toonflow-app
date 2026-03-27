@@ -9,6 +9,5 @@ const knexConfig = buildKnexConfig(config, {
   migrationsExtension: "ts"
 });
 
-export default knexConfig;
-
-module.exports = knexConfig;
+// CommonJS bridge used by Knex tooling that looks for knexfile exports.
+export = knexConfig;

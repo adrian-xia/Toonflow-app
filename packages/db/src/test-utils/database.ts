@@ -117,7 +117,12 @@ export async function createTestDatabase(
       `SELECT MAX(batch) AS batch FROM ${quoteIdentifier(schema)}.${quoteIdentifier("knex_migrations")}`
     );
     const batch = rows[0]?.batch;
-    return typeof batch === "number" ? batch : null;
+    if (batch === null || batch === undefined) {
+      return null;
+    }
+
+    const parsedBatch = Number(batch);
+    return Number.isFinite(parsedBatch) ? parsedBatch : null;
   };
 
   const truncateAllTables = async (
