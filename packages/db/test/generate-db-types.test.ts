@@ -90,6 +90,23 @@ after(async () => {
 
 test("db:types generates required project and json type shapes", async () => {
   const generatedTypesSnapshot = await takeGeneratedTypesSnapshot();
+  assert.equal(
+    generatedTypesSnapshot.exists,
+    true,
+    "Expected checked-in src/types/generated.ts to exist before db:types drift check"
+  );
+
+  try {
+    runDbCommand("db:types", database.dbEnv);
+    const cleanGeneratedSource = await readFile(GENERATED_TYPES_FILE, "utf8");
+    assert.equal(
+      cleanGeneratedSource,
+      generatedTypesSnapshot.content,
+      "Checked-in src/types/generated.ts is stale. Run `pnpm --filter @toonflow/db db:types` and commit the updated file."
+    );
+  } finally {
+    await restoreGeneratedTypesSnapshot(generatedTypesSnapshot);
+  }
 
   await runSql(
     database.dbEnv,
