@@ -8,12 +8,15 @@ import {
   readDbConfig
 } from "../src/index";
 import { createTestDatabase, TestDatabase } from "../src/test-utils/database";
+import { runDbCommand } from "./helpers/run-db-command";
 
 let database: TestDatabase;
 let db: ReturnType<typeof createDbClient>;
 
 before(async () => {
   database = await createTestDatabase();
+  await database.resetSchema();
+  runDbCommand("db:migrate", database.dbEnv);
   db = createDbClient(readDbConfig(database.dbEnv, { prefix: "DB" }));
 });
 
