@@ -2,7 +2,7 @@
 
 ## 定位
 
-Phase 2 是 `@toonflow/db` 之后的基础设施阶段，目标是把 AI 能力与文件存储能力提取为可复用包边界，而不是做 API 工具层重构。本文件只定义阶段边界与验收口径，包级约束见详细设计文档。
+Phase 2 是 `@toonflow/db` 之后的基础设施阶段，目标是把 AI 能力与文件存储能力提取为可复用包边界，而不是做 API 工具层重构。本文件只定义阶段边界与验收口径；包级约束由后续配套详细设计承接。
 
 ## 目标
 
@@ -66,9 +66,9 @@ const storage = createLocalStorage({
 
 ## 交付物
 
-- 阶段说明文档：[`02-ai-providers-storage.md`](./02-ai-providers-storage.md)
-- 详细设计文档：[`02-ai-providers-storage-spec.md`](./02-ai-providers-storage-spec.md)
-- 两个文档统一对齐 `architecture-overview.md` 与 Phase 1 的阶段文档层级。
+- 当前阶段文档交付：重写 [`02-ai-providers-storage.md`](./02-ai-providers-storage.md)，与 Phase 1 结构对齐。
+- 后续配套详细设计交付：[`02-ai-providers-storage-spec.md`](./02-ai-providers-storage-spec.md)（在后续任务中创建并补齐）。
+- 两层文档完成后统一对齐 `architecture-overview.md` 与 Phase 1 的阶段文档层级。
 
 ## 验收标准
 
