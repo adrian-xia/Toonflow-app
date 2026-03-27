@@ -11,6 +11,10 @@ const GENERATED_TYPES_FILE = resolve(
   __dirname,
   "../src/types/generated.ts"
 );
+const GENERATOR_SCRIPT_FILE = resolve(
+  __dirname,
+  "../scripts/generate-db-types.ts"
+);
 
 let database: TestDatabase;
 
@@ -95,4 +99,9 @@ test("db:types generates required project and json type shapes", async () => {
     );
     runDbCommand("db:types", database.dbEnv);
   }
+});
+
+test("db:types script uses shared knex config construction path", async () => {
+  const source = await readFile(GENERATOR_SCRIPT_FILE, "utf8");
+  assert.match(source, /buildKnexConfig/);
 });

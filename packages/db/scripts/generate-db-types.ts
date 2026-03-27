@@ -1,8 +1,8 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { Client } from "pg";
+import knex, { Knex } from "knex";
 
-import { DbConfig } from "../src/config/db-config";
+import { buildKnexConfig } from "../src/client/knex-config";
 import { readDbConfig } from "../src/config/read-db-config";
 
 interface EnumRow {
@@ -188,8 +188,12 @@ function buildGeneratedSource(tables: Map<string, ColumnRow[]>, enumMap: Map<str
   return `${lines.join("\n")}\n`;
 }
 
-async function readEnums(client: Client, schema: string): Promise<Map<string, string[]>> {
-  const result = await client.query<EnumRow>(
+interface RawRows<T> {
+  rows: T[];
+}
+
+async function readEnums(db: Knex, schema: string): Promise<Map<string, string[]>> {
+  const result = (await db.raw(
     `
       SELECT
         pg_type.typname AS "enumName",
@@ -197,11 +201,11 @@ async function readEnums(client: Client, schema: string): Promise<Map<string, st
       FROM pg_type
       INNER JOIN pg_enum ON pg_enum.enumtypid = pg_type.oid
       INNER JOIN pg_namespace ON pg_namespace.oid = pg_type.typnamespace
-      WHERE pg_namespace.nspname = $1
+      WHERE pg_namespace.nspname = ?
       ORDER BY pg_type.typname, pg_enum.enumsortorder
     `,
     [schema]
-  );
+  )) as RawRows<EnumRow>;
 
   const enumMap = new Map<string, string[]>();
   for (const row of result.rows) {
@@ -216,8 +220,8 @@ async function readEnums(client: Client, schema: string): Promise<Map<string, st
   return enumMap;
 }
 
-async function readColumns(client: Client, schema: string): Promise<Map<string, ColumnRow[]>> {
-  const result = await client.query<ColumnRow>(
+async function readColumns(db: Knex, schema: string): Promise<Map<string, ColumnRow[]>> {
+  const result = (await db.raw(
     `
       SELECT
         columns.table_name AS "tableName",
@@ -231,12 +235,12 @@ async function readColumns(client: Client, schema: string): Promise<Map<string, 
       INNER JOIN information_schema.tables
         ON tables.table_schema = columns.table_schema
        AND tables.table_name = columns.table_name
-      WHERE columns.table_schema = $1
+      WHERE columns.table_schema = ?
         AND tables.table_type = 'BASE TABLE'
       ORDER BY columns.table_name, columns.ordinal_position
     `,
     [schema]
-  );
+  )) as RawRows<ColumnRow>;
 
   const tableMap = new Map<string, ColumnRow[]>();
   for (const row of result.rows) {
@@ -255,26 +259,14 @@ async function readColumns(client: Client, schema: string): Promise<Map<string, 
   return tableMap;
 }
 
-function createPgClient(config: DbConfig): Client {
-  return new Client({
-    host: config.host,
-    port: config.port,
-    user: config.user,
-    password: config.password,
-    database: config.database,
-    ssl: config.ssl
-  });
-}
-
 async function main() {
   const config = readDbConfig(process.env, { prefix: "DB" });
-  const client = createPgClient(config);
-  await client.connect();
+  const db = knex(buildKnexConfig(config));
 
   try {
     const [enumMap, tables] = await Promise.all([
-      readEnums(client, config.schema),
-      readColumns(client, config.schema)
+      readEnums(db, config.schema),
+      readColumns(db, config.schema)
     ]);
     const source = buildGeneratedSource(tables, enumMap);
 
@@ -285,7 +277,7 @@ async function main() {
       `db:types wrote ${OUTPUT_FILE} (${tables.size} table${tables.size === 1 ? "" : "s"})`
     );
   } finally {
-    await client.end();
+    await db.destroy();
   }
 }
 
