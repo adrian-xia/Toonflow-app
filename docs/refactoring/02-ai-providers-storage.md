@@ -32,7 +32,7 @@ Phase 2 明确不做以下事项：
 ## 关键决策
 
 - 两个包都必须通过显式构造与 `dependency injection` 被上层消费，禁止回流为全局工具对象。
-- `@toonflow/ai-providers` 接收结构化配置对象，不负责配置持久化。
+- `@toonflow/ai-providers` 采用“两段式装配”：厂商 provider 工厂接收结构化配置，registry 只接收 provider 实例；包本身不负责配置持久化。
 - `TextProvider` 在 Phase 2 就必须同时支持 `invoke()` 与 `stream()` 两种调用语义。
 - `@toonflow/storage` 必须优先提供真实可运行的 `local storage` 实现。
 - `S3-compatible storage` 在 Phase 2 保持扩展点，不作为首批必交实现。
@@ -40,15 +40,22 @@ Phase 2 明确不做以下事项：
 
 ## 集成方式
 
-上层以显式构造的方式装配依赖，并通过依赖注入传入服务层或入口层组合器：
+上层以显式构造的方式装配依赖，并通过依赖注入传入服务层或最小验证组合层：
 
 ```ts
-import { createAiProviderRegistry } from "@toonflow/ai-providers";
+import {
+  createAiProviderRegistry,
+  createVendorImageProvider,
+  createVendorTextProvider
+} from "@toonflow/ai-providers";
 import { createLocalStorage } from "@toonflow/storage";
 
+const textProvider = createVendorTextProvider(textProviderConfig);
+const imageProvider = createVendorImageProvider(imageProviderConfig);
+
 const aiRegistry = createAiProviderRegistry({
-  text: [/* structured config */],
-  image: [/* structured config */],
+  text: [textProvider],
+  image: [imageProvider],
   video: []
 });
 
@@ -62,7 +69,8 @@ const storage = createLocalStorage({
 
 - 包内不直接依赖 `process.env` 进行业务配置决策。
 - 配置解析可在边缘层完成，再以结构化对象注入到两个包。
-- 入口层只负责装配，不把 provider 与 storage 重新包装为全局单例。
+- 入口层或脚本直连 provider / storage 仅用于 Phase 2 最小链路验证，不是长期依赖模式。
+- 长期依赖方向保持由 `@toonflow/services` 聚合 `db + ai-providers + storage`，入口层只做注入与编排边界承接。
 
 ## 交付物
 

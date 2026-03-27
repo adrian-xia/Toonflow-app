@@ -31,6 +31,7 @@
 
 - `@toonflow/ai-providers` 与 `@toonflow/storage` 必须作为 `packages/` 下并列 package 存在，二者不互相依赖。
 - 二者均属于基础设施层，长期由上层聚合消费，不能回流为任一 app 的内部子模块。
+- 长期目标是由 `@toonflow/services` 聚合 `db + ai-providers + storage`；入口层或脚本直连仅用于 Phase 2 最小链路验证，不是未来包依赖模式。
 
 目标依赖方向保持为：
 
@@ -82,11 +83,18 @@ packages/
 - 上层消费必须使用显式构造与依赖注入，不允许依赖包内全局单例或导入即初始化副作用。
 - 公共 API 不暴露厂商 SDK 原始对象、底层文件系统句柄或内部注册表实现细节。
 - 包内可以存在多层实现目录，但跨包只认可 `@toonflow/ai-providers`、`@toonflow/storage` 的稳定导出面。
+- `@toonflow/ai-providers` 公共导出需包含首批厂商 provider 工厂，遵循“先建 provider、再装 registry”的装配契约。
 
 推荐装配方式（示意）：
 
 ```ts
-const aiRegistry = createAiProviderRegistry(aiProvidersConfig);
+const textProvider = createVendorTextProvider(textProviderConfig);
+const imageProvider = createVendorImageProvider(imageProviderConfig);
+const aiRegistry = createAiProviderRegistry({
+  text: [textProvider],
+  image: [imageProvider],
+  video: []
+});
 const storage = createLocalStorage(storageConfig);
 
 const serviceDeps = {
@@ -153,10 +161,11 @@ packages/ai-providers/
 - `ImageProvider`
 - `VideoProvider`
 - 各模态共享的 request / result / stream chunk 类型
+- 首批厂商 provider 工厂（抽象形态），例如 `createVendorTextProvider(config)`、`createVendorImageProvider(config)`
 
 ### 8.5 配置模型与注册装配约束
 
-- provider 包只接受结构化配置对象，不在包内直接读取 `process.env`。
+- provider 工厂只接受结构化配置对象，不在包内直接读取 `process.env`。
 - 边缘层可以提供 `env -> config` 的解析函数，但解析过程不能替代业务默认值决策。
 - registry 装配只负责接收 provider 实例并提供解析能力，不承担配置持久化或场景路由策略。
 - 默认 provider 的业务选择由上层组合层决定，不固化在 `@toonflow/ai-providers` 包内。

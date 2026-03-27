@@ -377,7 +377,7 @@ git diff -- docs/refactoring/02-ai-providers-storage.md docs/refactoring/02-ai-p
 
 Expected:
 - no whitespace or patch-format issues
-- the final diff only touches the two intended refactoring docs
+- refactoring 文档 diff 只触达两份目标文档；计划文件的 Task 5 勾选更新属于本任务预期附带变更
 
 - [x] **Step 4: Commit the finalized documentation set**
 
