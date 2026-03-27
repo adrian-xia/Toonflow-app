@@ -65,6 +65,9 @@ function resolveType(row: ColumnRow, enumMap: Map<string, string[]>): string {
   if (row.udtName === "uuid") {
     return "string";
   }
+  if (row.udtName === "citext") {
+    return "string";
+  }
   if (row.udtName === "int8") {
     return "string";
   }
@@ -156,7 +159,10 @@ function buildGeneratedSource(tables: Map<string, ColumnRow[]>, enumMap: Map<str
         resolveType(row, enumMap),
         row.isNullable === "YES"
       ),
-      optional: row.columnDefault !== null || row.isIdentity === "YES"
+      optional:
+        row.columnDefault !== null ||
+        row.isIdentity === "YES" ||
+        row.isNullable === "YES"
     }));
 
     const updateColumns: ColumnSpec[] = tableRows

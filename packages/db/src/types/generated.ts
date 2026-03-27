@@ -18,7 +18,7 @@ export interface ProjectInsert {
   id: string;
   slug: string;
   title: string;
-  description: string | null;
+  description?: string | null;
   status?: "draft" | "archived";
   created_at?: string;
   updated_at?: string;
