@@ -35,12 +35,19 @@ function quoteTypeLiteral(value: string): string {
 }
 
 function singularizeSegment(segment: string): string {
+  if (segment === "analyses") {
+    return "analysis";
+  }
+  if (segment === "statuses") {
+    return "status";
+  }
+
   if (segment.endsWith("ies") && segment.length > 3) {
     return `${segment.slice(0, -3)}y`;
   }
 
   if (
-    /(?:sses|xes|zes|ches|shes|ses)$/.test(segment) &&
+    /(?:sses|xes|zes|ches|shes)$/.test(segment) &&
     segment.length > 2
   ) {
     return segment.slice(0, -2);

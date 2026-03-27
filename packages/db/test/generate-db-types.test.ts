@@ -125,6 +125,18 @@ test("db:types generates required project and json type shapes", async () => {
         id uuid PRIMARY KEY,
         name text NOT NULL
       );
+      CREATE TABLE ${quoteIdentifier(database.schema)}.${quoteIdentifier("cases")} (
+        id uuid PRIMARY KEY,
+        name text NOT NULL
+      );
+      CREATE TABLE ${quoteIdentifier(database.schema)}.${quoteIdentifier("bases")} (
+        id uuid PRIMARY KEY,
+        name text NOT NULL
+      );
+      CREATE TABLE ${quoteIdentifier(database.schema)}.${quoteIdentifier("analyses")} (
+        id uuid PRIMARY KEY,
+        name text NOT NULL
+      );
     `
   );
 
@@ -153,10 +165,22 @@ test("db:types generates required project and json type shapes", async () => {
 
     const companyRowBlock = readInterfaceBlock(source, "CompanyRow");
     assert.match(companyRowBlock, /name: string;/);
+
+    const caseRowBlock = readInterfaceBlock(source, "CaseRow");
+    assert.match(caseRowBlock, /name: string;/);
+
+    const baseRowBlock = readInterfaceBlock(source, "BaseRow");
+    assert.match(baseRowBlock, /name: string;/);
+
+    const analysisRowBlock = readInterfaceBlock(source, "AnalysisRow");
+    assert.match(analysisRowBlock, /name: string;/);
   } finally {
     await runSql(
       database.dbEnv,
       `
+        DROP TABLE IF EXISTS ${quoteIdentifier(database.schema)}.${quoteIdentifier("analyses")};
+        DROP TABLE IF EXISTS ${quoteIdentifier(database.schema)}.${quoteIdentifier("bases")};
+        DROP TABLE IF EXISTS ${quoteIdentifier(database.schema)}.${quoteIdentifier("cases")};
         DROP TABLE IF EXISTS ${quoteIdentifier(database.schema)}.${quoteIdentifier("companies")};
         DROP TABLE IF EXISTS ${quoteIdentifier(database.schema)}.${quoteIdentifier("project_statuses")};
         DROP TABLE IF EXISTS ${quoteIdentifier(database.schema)}.${quoteIdentifier("citext_samples")}
