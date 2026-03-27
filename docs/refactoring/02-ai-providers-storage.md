@@ -66,9 +66,9 @@ const storage = createLocalStorage({
 
 ## 交付物
 
-- 当前阶段文档交付：重写 [`02-ai-providers-storage.md`](./02-ai-providers-storage.md)，与 Phase 1 结构对齐。
-- 后续配套详细设计交付：[`02-ai-providers-storage-spec.md`](./02-ai-providers-storage-spec.md)（在后续任务中创建并补齐）。
-- 两层文档完成后统一对齐 `architecture-overview.md` 与 Phase 1 的阶段文档层级。
+- 阶段说明文档交付：[`02-ai-providers-storage.md`](./02-ai-providers-storage.md)，与 Phase 1 结构对齐。
+- 配套详细设计文档交付：[`02-ai-providers-storage-spec.md`](./02-ai-providers-storage-spec.md)，用于固化共享规则与包级约束。
+- 两层文档需统一对齐 `architecture-overview.md` 与 Phase 1 的阶段文档层级。
 
 ## 验收标准
 

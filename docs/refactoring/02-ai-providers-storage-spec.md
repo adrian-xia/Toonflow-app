@@ -20,7 +20,7 @@
 
 ## 3. 非目标
 
-- 本节不提前补全 `@toonflow/ai-providers` 与 `@toonflow/storage` 的包内专属实现细节（由后续任务在第 8、9 节展开）。
+- 本节不提前补全 `@toonflow/ai-providers` 与 `@toonflow/storage` 的包内专属实现细节（由第 8、9 节展开）。
 - 不在 Phase 2 设计 provider 配置持久化、业务路由策略或场景级 fallback 策略。
 - 不在 Phase 2 首批交付 `video` 的真实厂商实现与 `S3-compatible storage` 的真实对象存储实现。
 - 不恢复全局单例、`utils.ts` 转发层或导入即初始化的兼容模式。
@@ -247,7 +247,5 @@ packages/storage/
 
 ## 12. 实施范围与衔接
 
-- Phase 2 本轮文档实施范围仅限两项：
-- 重写 `docs/refactoring/02-ai-providers-storage.md`。
-- 新增并补全 `docs/refactoring/02-ai-providers-storage-spec.md`。
+- Phase 2 本轮文档实施范围仅限两项：重写 `docs/refactoring/02-ai-providers-storage.md`；新增并补全 `docs/refactoring/02-ai-providers-storage-spec.md`。
 - 本文档作为后续实现计划输入，代码阶段继续遵循 explicit 构造与 dependency injection 的集成原则，不在本阶段扩展额外交付面。

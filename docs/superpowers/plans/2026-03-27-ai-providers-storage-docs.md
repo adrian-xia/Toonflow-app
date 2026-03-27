@@ -341,7 +341,7 @@ git commit -m "docs: complete storage and validation phase 2 spec"
 - Reference: `docs/refactoring/architecture-overview.md`
 - Reference: `docs/superpowers/specs/2026-03-27-ai-providers-storage-design.md`
 
-- [ ] **Step 1: Compare terminology and dependency direction across all relevant docs**
+- [x] **Step 1: Compare terminology and dependency direction across all relevant docs**
 
 Run:
 
@@ -356,7 +356,7 @@ rg -n "@toonflow/ai-providers|@toonflow/storage|services|dependency injection|lo
 Expected:
 - package names, dependency direction, and baseline terms line up across the four docs
 
-- [ ] **Step 2: Resolve any wording drift or contradictory scope statements**
+- [x] **Step 2: Resolve any wording drift or contradictory scope statements**
 
 Typical corrections to make if found:
 
@@ -366,7 +366,7 @@ Typical corrections to make if found:
 - keep provider config persistence and routing strategy out of package responsibilities
 ```
 
-- [ ] **Step 3: Run final document integrity checks**
+- [x] **Step 3: Run final document integrity checks**
 
 Run:
 
@@ -379,7 +379,7 @@ Expected:
 - no whitespace or patch-format issues
 - the final diff only touches the two intended refactoring docs
 
-- [ ] **Step 4: Commit the finalized documentation set**
+- [x] **Step 4: Commit the finalized documentation set**
 
 ```bash
 git add docs/refactoring/02-ai-providers-storage.md docs/refactoring/02-ai-providers-storage-spec.md
