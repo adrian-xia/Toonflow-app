@@ -1,11 +1,13 @@
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
+import { spawnSync, SpawnSyncReturns } from "node:child_process";
 
-export function runDbCommand(
-  command: "db:migrate" | "db:rollback" | "db:types",
+export type DbCommand = "db:migrate" | "db:rollback" | "db:types";
+
+export function runDbCommandResult(
+  command: DbCommand,
   env: NodeJS.ProcessEnv
-) {
-  const result = spawnSync(
+): SpawnSyncReturns<string> {
+  return spawnSync(
     "pnpm",
     ["--filter", "@toonflow/db", command],
     {
@@ -14,6 +16,13 @@ export function runDbCommand(
       encoding: "utf8"
     }
   );
+}
+
+export function runDbCommand(
+  command: DbCommand,
+  env: NodeJS.ProcessEnv
+) {
+  const result = runDbCommandResult(command, env);
 
   assert.equal(
     result.status,

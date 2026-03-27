@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readFile, rm, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { after, before, test } from "node:test";
 import { Client } from "pg";
 
 import { createTestDatabase, TestDatabase } from "../src/test-utils/database";
-import { runDbCommand } from "./helpers/run-db-command";
+import { runDbCommand, runDbCommandResult } from "./helpers/run-db-command";
 
 const GENERATED_TYPES_FILE = resolve(
   __dirname,
@@ -17,6 +17,11 @@ const GENERATOR_SCRIPT_FILE = resolve(
 );
 
 let database: TestDatabase;
+
+interface GeneratedTypesSnapshot {
+  exists: boolean;
+  content: string;
+}
 
 function quoteIdentifier(value: string): string {
   return `"${value.replace(/"/g, "\"\"")}"`;
@@ -48,6 +53,29 @@ function readInterfaceBlock(source: string, interfaceName: string): string {
   return match[1];
 }
 
+async function takeGeneratedTypesSnapshot(): Promise<GeneratedTypesSnapshot> {
+  try {
+    const content = await readFile(GENERATED_TYPES_FILE, "utf8");
+    return { exists: true, content };
+  } catch (error: unknown) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      return { exists: false, content: "" };
+    }
+    throw error;
+  }
+}
+
+async function restoreGeneratedTypesSnapshot(
+  snapshot: GeneratedTypesSnapshot
+): Promise<void> {
+  if (snapshot.exists) {
+    await writeFile(GENERATED_TYPES_FILE, snapshot.content, "utf8");
+    return;
+  }
+
+  await rm(GENERATED_TYPES_FILE, { force: true });
+}
+
 before(async () => {
   database = await createTestDatabase();
   await database.resetSchema();
@@ -61,6 +89,8 @@ after(async () => {
 });
 
 test("db:types generates required project and json type shapes", async () => {
+  const generatedTypesSnapshot = await takeGeneratedTypesSnapshot();
+
   await runSql(
     database.dbEnv,
     `
@@ -69,6 +99,14 @@ test("db:types generates required project and json type shapes", async () => {
         id uuid PRIMARY KEY,
         title citext NOT NULL,
         notes citext
+      );
+      CREATE TABLE ${quoteIdentifier(database.schema)}.${quoteIdentifier("project_statuses")} (
+        id uuid PRIMARY KEY,
+        label text NOT NULL
+      );
+      CREATE TABLE ${quoteIdentifier(database.schema)}.${quoteIdentifier("companies")} (
+        id uuid PRIMARY KEY,
+        name text NOT NULL
       );
     `
   );
@@ -92,12 +130,55 @@ test("db:types generates required project and json type shapes", async () => {
     const citextRowBlock = readInterfaceBlock(source, "CitextSampleRow");
     assert.match(citextRowBlock, /title: string;/);
     assert.match(citextRowBlock, /notes: string \| null;/);
+
+    const statusRowBlock = readInterfaceBlock(source, "ProjectStatusRow");
+    assert.match(statusRowBlock, /label: string;/);
+
+    const companyRowBlock = readInterfaceBlock(source, "CompanyRow");
+    assert.match(companyRowBlock, /name: string;/);
   } finally {
     await runSql(
       database.dbEnv,
-      `DROP TABLE IF EXISTS ${quoteIdentifier(database.schema)}.${quoteIdentifier("citext_samples")}`
+      `
+        DROP TABLE IF EXISTS ${quoteIdentifier(database.schema)}.${quoteIdentifier("companies")};
+        DROP TABLE IF EXISTS ${quoteIdentifier(database.schema)}.${quoteIdentifier("project_statuses")};
+        DROP TABLE IF EXISTS ${quoteIdentifier(database.schema)}.${quoteIdentifier("citext_samples")}
+      `
     );
-    runDbCommand("db:types", database.dbEnv);
+    await restoreGeneratedTypesSnapshot(generatedTypesSnapshot);
+  }
+});
+
+test("db:types fails with clear details for unsupported type mapping", async () => {
+  const generatedTypesSnapshot = await takeGeneratedTypesSnapshot();
+
+  await runSql(
+    database.dbEnv,
+    `
+      CREATE TABLE ${quoteIdentifier(database.schema)}.${quoteIdentifier("unsupported_type_samples")} (
+        id uuid PRIMARY KEY,
+        marker point NOT NULL
+      );
+    `
+  );
+
+  try {
+    const result = runDbCommandResult("db:types", database.dbEnv);
+    const output = `${result.stdout}\n${result.stderr}`;
+
+    assert.notEqual(result.status, 0);
+    assert.match(output, /Unsupported PostgreSQL type mapping/);
+    assert.match(output, new RegExp(`schema "${database.schema}"`));
+    assert.match(output, /table "unsupported_type_samples"/);
+    assert.match(output, /column "marker"/);
+    assert.match(output, /data_type "point"/);
+    assert.match(output, /udt_name "point"/);
+  } finally {
+    await runSql(
+      database.dbEnv,
+      `DROP TABLE IF EXISTS ${quoteIdentifier(database.schema)}.${quoteIdentifier("unsupported_type_samples")}`
+    );
+    await restoreGeneratedTypesSnapshot(generatedTypesSnapshot);
   }
 });
 
