@@ -1,16 +1,20 @@
 import { Knex } from "knex";
 
-const TABLE_NAME = "projects";
+import {
+  createProjectStatusType,
+  defineProjectsTable,
+  dropProjectStatusType,
+  PROJECTS_TABLE
+} from "../schema/tables/projects";
 
 export async function up(knex: Knex): Promise<void> {
-  await knex.schema.createTable(TABLE_NAME, (table) => {
-    table.bigIncrements("id").primary();
-    table.text("name").notNullable();
-    table.timestamp("created_at", { useTz: true }).notNullable().defaultTo(knex.fn.now());
-    table.timestamp("updated_at", { useTz: true }).notNullable().defaultTo(knex.fn.now());
+  await createProjectStatusType(knex);
+  await knex.schema.createTable(PROJECTS_TABLE, (table) => {
+    defineProjectsTable(table, knex);
   });
 }
 
 export async function down(knex: Knex): Promise<void> {
-  await knex.schema.dropTableIfExists(TABLE_NAME);
+  await knex.schema.dropTableIfExists(PROJECTS_TABLE);
+  await dropProjectStatusType(knex);
 }
