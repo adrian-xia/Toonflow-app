@@ -23,7 +23,7 @@
 - `@toonflow/services` 允许在单次业务用例内编排 `repository + ai-providers + storage`，包括单次 AI 生成型业务用例。
 - `@toonflow/services` 不承载 HTTP 请求解析、响应 envelope、鉴权、日志、SSE/WebSocket 等传输层职责，这些继续留在 `apps/api`。
 - `@toonflow/services` 不提前承载可复用 Agent 运行时、长生命周期任务状态机或多阶段工作流编排，这些继续留给第 4 阶段 `agents` 和第 5 阶段 `workflow`。
-- 第 3 阶段允许 `apps/api` 做最小验证接入，但长期模式仍然是入口层只消费 `@toonflow/services` 的稳定导出面。
+- 第 3 阶段允许 `apps/api` 做最小验证接入，但长期模式仍然是入口层的业务调用面只消费 `@toonflow/services` 的稳定导出面；应用启动期可以作为 composition root 完成底层依赖装配。
 - 第 3 阶段不把 `prompt`、`setting`、`auth` 纳入首批服务分组，也不承诺“所有旧路由功能按原样迁移”。
 
 ## 目标与非目标
@@ -78,6 +78,8 @@ services + agents + workflow + kernel
   └── apps/api
 ```
 
+上面的依赖方向表达的是业务依赖与包职责分层，不否定应用启动期的依赖装配职责。
+
 边界约束如下：
 
 - `@toonflow/services` 可以依赖：
@@ -94,7 +96,11 @@ services + agents + workflow + kernel
   - 请求解析与参数校验
   - 鉴权、日志、错误映射
   - HTTP / WebSocket / SSE 传输适配
+  - 应用启动期的依赖装配
   - 调用 `@toonflow/services` 并封装响应
+- `apps/api` 的约束：
+  - 可以在应用启动期作为 composition root 初始化 repository、AI registry、storage adapter 等底层实例，并注入 `@toonflow/services`
+  - route/controller 等业务调用面不得绕过 `@toonflow/services` 直接拼接底层包实现
 - `@toonflow/services` 负责：
   - 领域用例执行
   - 单次业务用例内的事务协调
@@ -201,7 +207,8 @@ services + agents + workflow + kernel
 - 这种接入是阶段性验证方式，不是把业务逻辑继续留在 route/controller 中的许可。
 - 入口层负责请求解析、参数校验、鉴权、错误映射和响应封装。
 - 领域用例执行、事务协调和底层依赖组合由 `@toonflow/services` 承担。
-- 依赖装配方式应是显式构造与注入，例如先初始化 repository、AI registry、storage adapter，再交给 services 组合层消费。
+- 依赖装配方式应是显式构造与注入；`apps/api` 可以在应用启动期作为 composition root 初始化 repository、AI registry、storage adapter，再交给 `@toonflow/services` 消费。
+- “入口层只消费 `@toonflow/services`”指的是 route/controller 等业务调用面不直接跨包拼接底层实现，不否定启动期的依赖注入职责。
 - 验收只要求存在最小可验证接入链路，不要求第 3 阶段一次性铺满全部 API 接入面。
 
 ## DTO、事务、错误与测试约束
