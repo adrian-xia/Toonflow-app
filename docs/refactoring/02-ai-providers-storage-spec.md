@@ -170,16 +170,84 @@ packages/ai-providers/
 
 ## 9. `@toonflow/storage` 设计
 
-> 本节由 Task 4 补充。
+### 9.1 包职责与边界
+
+`@toonflow/storage` 在 Phase 2 中只负责以下事项：
+
+- 文件写入与读取。
+- 文件存在性检查。
+- 文件删除与目录删除。
+- 图片内容的 Base64 读取。
+- 对外 URL 生成。
+
+`@toonflow/storage` 不负责以下事项：
+
+- 业务目录规划。
+- 资源权限判断。
+- 上传传输协议适配。
+- 与 provider 或工作流的编排联动。
+
+### 9.2 Phase 2 能力基线
+
+- `local storage` 是首批必须可运行并可验收的基础实现。
+- `S3-compatible storage` 在 Phase 2 仅保留接口与扩展位，不属于首批必须交付项。
+
+### 9.3 建议目录结构
+
+```text
+packages/storage/
+├── src/
+│   ├── index.ts
+│   ├── config/
+│   ├── errors/
+│   ├── pathing/
+│   └── adapters/
+│       ├── local/
+│       └── s3/
+```
+
+### 9.4 稳定公共导出面与适配器最小契约
+
+`@toonflow/storage` 需要长期稳定暴露：
+
+- `StorageAdapter`
+- `LocalStorageConfig`
+- `createLocalStorage(config)`
+
+`StorageAdapter` 最小能力契约为：
+
+- `writeFile(path, data)`
+- `getFile(path)`
+- `getImageBase64(path)`
+- `getFileUrl(path)`
+- `fileExists(path)`
+- `deleteFile(path)`
+- `deleteDirectory(path)`
+
+### 9.5 配置与路径约束
+
+- storage 包只接受结构化配置对象，不在包内直接读取 `process.env`。
+- 路径解析必须限制在 `rootDir` 内，任何越界路径都应被拒绝。
+- URL 生成必须基于 explicit 配置字段（如 `publicBaseUrl`），不允许依赖隐式常量拼接。
+- 业务层决定文件放置子目录；`@toonflow/storage` 只负责安全、稳定地执行文件操作。
 
 ## 10. 错误模型设计
 
-> 待后续任务补充。
+- provider 与 storage 错误必须先归一化后再向上暴露，不能直接抛出厂商 SDK 或 Node.js 原始异常。
+- 共享错误语义（错误码、错误类型、可恢复性标识）优先放在 `@toonflow/kernel`，避免基础设施包各自定义平行协议。
+- `@toonflow/ai-providers` 至少覆盖配置错误、认证错误、限流/配额错误、调用失败、能力不支持与流式中断语义。
+- `@toonflow/storage` 至少覆盖配置错误、非法路径、文件不存在、读写失败与 URL 配置错误语义。
 
 ## 11. 测试与验证基线
 
-> 待后续任务补充。
+- 两个包都必须具备独立可运行的 `build`、`lint`、`typecheck` 验证链路。
+- `@toonflow/ai-providers` 测试重点是 registry、契约与 stub/mock 行为，默认基线不依赖真实在线厂商调用。
+- `TextProvider.invoke()` 与 `TextProvider.stream()` 都必须有行为级测试，确保共享请求边界与可消费流式语义。
+- `@toonflow/storage` 测试必须覆盖真实本地文件系统行为，包括写入/读取、存在性、删除、目录删除、Base64 读取、URL 生成与非法路径保护。
 
 ## 12. 实施范围与衔接
 
-> 待后续任务补充。
+- Phase 2 本轮文档实施范围仅限两项：
+- 重写 `docs/refactoring/02-ai-providers-storage.md`。
+- 新增并补全 `docs/refactoring/02-ai-providers-storage-spec.md`。
+- 本文档作为后续实现计划输入，代码阶段继续遵循 explicit 构造与 dependency injection 的集成原则，不在本阶段扩展额外交付面。

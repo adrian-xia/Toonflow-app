@@ -261,7 +261,7 @@ git commit -m "docs: define ai providers phase 2 spec"
 - Modify: `docs/refactoring/02-ai-providers-storage-spec.md`
 - Reference: `docs/superpowers/specs/2026-03-27-ai-providers-storage-design.md`
 
-- [ ] **Step 1: Write the `@toonflow/storage` responsibility and baseline sections**
+- [x] **Step 1: Write the `@toonflow/storage` responsibility and baseline sections**
 
 The section must explicitly state:
 
@@ -271,7 +271,7 @@ The section must explicitly state:
 - baseline: `local storage` is required; `S3-compatible storage` remains an extension point
 ```
 
-- [ ] **Step 2: Add the directory layout, public API, and config/pathing rules**
+- [x] **Step 2: Add the directory layout, public API, and config/pathing rules**
 
 Include a code block equivalent to:
 
@@ -301,7 +301,7 @@ And describe the minimum adapter contract:
 
 The pathing rules must state that storage paths stay inside `rootDir` and URL generation is based on explicit config.
 
-- [ ] **Step 3: Write sections `10` through `12` for error model, testing, and implementation handoff**
+- [x] **Step 3: Write sections `10` through `12` for error model, testing, and implementation handoff**
 
 Required content:
 
@@ -313,7 +313,7 @@ Required content:
 - implementation scope is limited to rewriting `02-ai-providers-storage.md` and adding `02-ai-providers-storage-spec.md`
 ```
 
-- [ ] **Step 4: Verify there are no placeholders or missing baseline terms**
+- [x] **Step 4: Verify there are no placeholders or missing baseline terms**
 
 Run:
 
@@ -326,7 +326,7 @@ Expected:
 - no placeholder text remains
 - the agreed baseline terms appear in the detailed spec
 
-- [ ] **Step 5: Commit the storage and validation sections**
+- [x] **Step 5: Commit the storage and validation sections**
 
 ```bash
 git add docs/refactoring/02-ai-providers-storage-spec.md
