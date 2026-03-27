@@ -40,7 +40,7 @@
 - Reference: `docs/refactoring/01-database-layer.md`
 - Reference: `docs/superpowers/specs/2026-03-27-ai-providers-storage-design.md`
 
-- [ ] **Step 1: Compare the current Phase 2 doc against the Phase 1 structure**
+- [x] **Step 1: Compare the current Phase 2 doc against the Phase 1 structure**
 
 Run:
 
@@ -52,7 +52,7 @@ Expected:
 - `01-database-layer.md` shows a full phase-doc structure such as `定位` / `目标` / `范围` / `非目标` / `关键决策` / `交付物` / `验收标准`
 - `02-ai-providers-storage.md` is visibly missing several of those sections
 
-- [ ] **Step 2: Replace the current top-level outline with the Phase 1 style headings**
+- [x] **Step 2: Replace the current top-level outline with the Phase 1 style headings**
 
 Rewrite `docs/refactoring/02-ai-providers-storage.md` so it uses this exact top-level skeleton:
 
@@ -70,7 +70,7 @@ Rewrite `docs/refactoring/02-ai-providers-storage.md` so it uses this exact top-
 ## 风险与注意事项
 ```
 
-- [ ] **Step 3: Fill `定位` / `目标` / `范围` / `非目标` from the approved design**
+- [x] **Step 3: Fill `定位` / `目标` / `范围` / `非目标` from the approved design**
 
 Required content to include:
 
@@ -82,7 +82,7 @@ Required content to include:
 - configuration persistence, provider routing strategy, and object storage implementation are out of scope
 ```
 
-- [ ] **Step 4: Fill `关键决策` / `集成方式` / `交付物` / `验收标准` / `风险与注意事项`**
+- [x] **Step 4: Fill `关键决策` / `集成方式` / `交付物` / `验收标准` / `风险与注意事项`**
 
 The doc must explicitly lock these decisions:
 
@@ -96,7 +96,7 @@ The doc must explicitly lock these decisions:
 
 Also add a delivery section that points to `docs/refactoring/02-ai-providers-storage-spec.md`.
 
-- [ ] **Step 5: Verify the stage doc structure and terminology**
+- [x] **Step 5: Verify the stage doc structure and terminology**
 
 Run:
 
@@ -110,7 +110,7 @@ Expected:
 - package names use the `@toonflow/*` form consistently
 - the approved baseline terms appear in the doc
 
-- [ ] **Step 6: Commit the stage doc rewrite**
+- [x] **Step 6: Commit the stage doc rewrite**
 
 ```bash
 git add docs/refactoring/02-ai-providers-storage.md
