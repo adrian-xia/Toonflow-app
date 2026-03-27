@@ -124,7 +124,7 @@ git commit -m "docs: rewrite phase 2 refactoring overview"
 - Reference: `docs/refactoring/01-database-layer-spec.md`
 - Reference: `docs/superpowers/specs/2026-03-27-ai-providers-storage-design.md`
 
-- [ ] **Step 1: Create the new spec file with the approved high-level structure**
+- [x] **Step 1: Create the new spec file with the approved high-level structure**
 
 Add this exact top-level skeleton to `docs/refactoring/02-ai-providers-storage-spec.md`:
 
@@ -145,7 +145,7 @@ Add this exact top-level skeleton to `docs/refactoring/02-ai-providers-storage-s
 ## 12. 实施范围与衔接
 ```
 
-- [ ] **Step 2: Write sections `1` through `7` before package-specific sections**
+- [x] **Step 2: Write sections `1` through `7` before package-specific sections**
 
 These shared sections must cover:
 
@@ -158,7 +158,7 @@ These shared sections must cover:
 - structured config inputs instead of package-internal `process.env` access
 ```
 
-- [ ] **Step 3: Verify the spec scaffold exists and is readable**
+- [x] **Step 3: Verify the spec scaffold exists and is readable**
 
 Run:
 
@@ -171,7 +171,7 @@ Expected:
 - all planned top-level sections exist
 - shared rules are present before package-specific sections
 
-- [ ] **Step 4: Commit the spec skeleton**
+- [x] **Step 4: Commit the spec skeleton**
 
 ```bash
 git add docs/refactoring/02-ai-providers-storage-spec.md
