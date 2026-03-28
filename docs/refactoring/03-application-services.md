@@ -50,7 +50,7 @@
 
 - `docs/refactoring/03-application-services.md`
 
-本阶段文档体系还包含配套详细设计文档 `docs/refactoring/03-application-services-spec.md`，与阶段说明文档一并作为本轮交付物。
+本阶段文档体系还包含配套详细设计文档 `docs/refactoring/03-application-services-spec.md`，与阶段说明文档共同构成第 3 阶段文档交付。
 
 ## 验收标准
 

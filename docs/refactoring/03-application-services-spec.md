@@ -162,7 +162,7 @@ packages/services/
 
 - `apps/api` 可在应用启动期作为 composition root 初始化 repository、AI registry、storage adapter，并显式注入 `@toonflow/services`。
 - route/controller 等业务调用面只消费 `@toonflow/services`，不得直接拼接底层包实现或越过 service 访问数据库与 provider。
-- 第 3 阶段只要求最小可验证接入链路，不要求铺满全部 API 接入面，也不要求完全替换旧有入口流程。
+- 第 3 阶段只要求最小可验证接入链路，不要求铺满全部 API 接入面，也不要求在本阶段完成所有入口接入链路替换。
 
 ## 12. 测试与验证基线
 
@@ -176,7 +176,7 @@ packages/services/
 
 ## 13. 实施范围与衔接
 
-本轮实施范围仅限重写 `03-application-services.md` 与新增 `03-application-services-spec.md`，不扩展到代码实现或其他阶段文档。
+本次 Phase 3 文档重构的实施范围仅限重写 `03-application-services.md` 与新增 `03-application-services-spec.md`，不扩展到代码实现或其他阶段文档。
 
 衔接说明：
 
