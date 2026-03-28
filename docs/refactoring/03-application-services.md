@@ -17,7 +17,6 @@
 
 - 服务层覆盖领域用例与单次业务用例内的事务协调
 - 首批范围只覆盖 `project / novel / outline / script / storyboard / assets / video`
-- 单次业务用例内可以组合 `repository + ai-providers + storage`
 
 ## 非目标
 
@@ -30,38 +29,35 @@
 
 - `@toonflow/services` 是共享应用服务层，不是 repository 的薄封装
 - route/controller 等业务调用面只消费 `@toonflow/services`，不直接拼接底层实现
-- `services` 负责单次业务用例编排，不提前承接 `agents` / `workflow` 的长流程职责
 
 ## 服务层职责与相邻阶段边界
 
-- `@toonflow/services` 负责领域用例执行、事务协调与单次业务用例内编排 `repository + ai-providers + storage`
+- `@toonflow/services` 负责领域用例执行与单次业务用例内的事务协调
 - `apps/api` 负责请求解析、参数校验、鉴权、错误映射与响应封装
-- `@toonflow/services` 不承接传输层职责，也不直接暴露底层实现细节
 - `agents` / `workflow` 负责可复用 Agent 运行时与长流程工作流编排，本阶段不抢占
 
 ## 集成方式
 
 - 最小装配链为 `db + ai-providers + storage -> services -> apps/api`
 - `apps/api` 在应用启动期作为 composition root 初始化底层依赖并注入 `@toonflow/services`
-- 业务调用面只依赖 `@toonflow/services`，不跨包直接拼接底层实现
 
 ## 首批交付基线
 
 - 首批交付基线是建立第 3 阶段文档边界与最小接入方式，而不是全量旧路由等价迁移
-- 交付目标聚焦 `project / novel / outline / script / storyboard / assets / video` 的服务层边界描述
 - 只要求形成最小可验证接入链路与依赖方向共识
 
 ## 交付物
 
 - `docs/refactoring/03-application-services.md`
-- `docs/refactoring/03-application-services-spec.md`（后续阶段补充的详细设计文档）
+
+本阶段文档体系还包含配套详细设计文档 `docs/refactoring/03-application-services-spec.md`，将在后续任务中补充，不作为当前任务完成态。
 
 ## 验收标准
 
-- 边界清晰：服务层职责与 `apps/api`、`agents`、`workflow` 分工明确
-- 范围收敛：首批领域仅限 `project / novel / outline / script / storyboard / assets / video`
-- 依赖方向一致：服务层仅面向 `db + ai-providers + storage` 并由 `apps/api` 消费
-- 最小接入口径明确：装配链与 composition root 口径清晰且可落地
+- 边界清晰：服务层与 `apps/api`、`agents`、`workflow` 的职责切分可核对
+- 范围收敛：首批领域范围已被明确限定
+- 依赖方向一致：装配链与 composition root 口径一致
+- 最小接入口径明确：最小接入方式可落地
 
 ## 风险与注意事项
 
