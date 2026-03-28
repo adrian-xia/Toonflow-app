@@ -146,7 +146,7 @@ git commit -m "docs: 重写 phase 4 阶段说明文档"
 - 参考：`docs/refactoring/03-application-services-spec.md`
 - 参考：`docs/superpowers/specs/2026-03-28-agent-runtime-design.md`
 
-- [ ] **步骤 1：创建详细设计文档并写入批准后的顶层结构**
+- [x] **步骤 1：创建详细设计文档并写入批准后的顶层结构**
 
 在 `docs/refactoring/04-agent-runtime-spec.md` 中加入以下顶层结构：
 
@@ -168,7 +168,7 @@ git commit -m "docs: 重写 phase 4 阶段说明文档"
 ## 13. 实施范围与衔接
 ```
 
-- [ ] **步骤 2：先写第 `1` 到 `5` 节共享规则**
+- [x] **步骤 2：先写第 `1` 到 `5` 节共享规则**
 
 这些章节必须覆盖：
 
@@ -180,7 +180,7 @@ git commit -m "docs: 重写 phase 4 阶段说明文档"
 - 建议目录结构只定义包内层次与运行时分层，不展开方法表、SDK 回调或入口适配代码
 ```
 
-- [ ] **步骤 3：验证详细设计骨架存在且顺序正确**
+- [x] **步骤 3：验证详细设计骨架存在且顺序正确**
 
 运行：
 
@@ -194,7 +194,7 @@ sed -n '1,220p' docs/refactoring/04-agent-runtime-spec.md
 - 13 个章节全部存在
 - 包边界、目录结构等共享规则章节位于 Agent 分组、上下文和事件协议章节之前
 
-- [ ] **步骤 4：提交详细设计骨架**
+- [x] **步骤 4：提交详细设计骨架**
 
 ```bash
 git add docs/refactoring/04-agent-runtime-spec.md
