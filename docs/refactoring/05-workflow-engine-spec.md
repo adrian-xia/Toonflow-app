@@ -8,7 +8,9 @@
 相关文档：
 
 - 架构总览：[`architecture-overview.md`](./architecture-overview.md)
+- 第 3 阶段阶段说明：[`03-application-services.md`](./03-application-services.md)
 - 第 3 阶段详细设计：[`03-application-services-spec.md`](./03-application-services-spec.md)
+- 第 4 阶段阶段说明：[`04-agent-runtime.md`](./04-agent-runtime.md)
 - 第 4 阶段详细设计：[`04-agent-runtime-spec.md`](./04-agent-runtime-spec.md)
 - 第 6 阶段阶段说明：[`06-api-gateway.md`](./06-api-gateway.md)
 - 设计输入：[`../superpowers/specs/2026-03-28-workflow-engine-design.md`](../superpowers/specs/2026-03-28-workflow-engine-design.md)
