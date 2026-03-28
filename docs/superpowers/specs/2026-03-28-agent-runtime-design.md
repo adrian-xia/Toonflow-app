@@ -22,9 +22,10 @@
 - `@toonflow/agents` 是共享 Agent 运行时层，不是入口层里的脚本集合，也不是 `workflow` 的轻量替身。
 - 第 4 阶段的首批范围覆盖内容生产主链中的五类 Agent：`outline`、`script`、`storyboard`、`assets`、`video`。
 - `@toonflow/agents` 只负责单次 Agent 运行的统一协议，包括上下文注入、统一事件流、artifact/result 输出边界与稳定调用接口。
+- 同名内容域的业务 owner 仍然是 `@toonflow/services`；同名 Agent 表示该内容域在 Agent 运行时中的统一封装，不替代 service 对单次业务用例、事务与持久化的归属。
 - 第 4 阶段明确采用硬边界：run 生命周期、状态机推进、暂停/恢复/重试、审核回退和阶段推进职责留给第 5 阶段 `workflow`。
 - `@toonflow/agents` 保持与架构总览一致的依赖方向：可依赖 `@toonflow/services`、`@toonflow/ai-providers`、`@toonflow/storage`、`@toonflow/kernel`；数据访问经 `services`，运行时模型调用与产物读写可直连 `ai-providers` / `storage`。
-- `apps/api`、`apps/mcp-server` 与后续 `workflow` 都应消费同一套 Agent 运行时协议，而不是各自定义私有 Agent 接口。
+- `@toonflow/agents` 对外暴露统一协议面，可被 `apps/api`、`apps/mcp-server` 与后续 `workflow` 复用；但“谁在什么场景下直接调用 Agent”必须按阶段边界区分主路径与允许路径。
 - 第 4 阶段不承诺完整工作流调度，也不下沉到每个 Agent 的方法级设计。
 
 ## 目标与非目标
@@ -33,8 +34,8 @@
 
 - 将第 4 阶段从“入口层里的 Agent 调用片段”改写为对齐 monorepo 架构的 Agent 运行时阶段文档。
 - 为 `@toonflow/agents` 建立稳定的包边界、依赖规则、Agent 分组与运行时协议口径。
-- 明确首批五类内容生产 Agent 的运行时职责边界，避免实现前在事件协议、上下文结构和输出语义上继续发散。
-- 固定 `apps/api`、`apps/mcp-server` 与未来 `workflow` 对 Agent 运行时的统一消费关系，同时维持长期依赖方向。
+- 明确首批五类内容生产 Agent 与同名 service 的职责边界，避免实现前在业务 owner、事件协议、上下文结构和输出语义上继续发散。
+- 固定 `apps/api`、`apps/mcp-server` 与未来 `workflow` 对 Agent 运行时的消费边界，区分阶段性允许路径与长期主路径。
 - 为后续实施计划提供足够清晰的 `AgentContext`、事件协议、artifact/result、错误与测试约束输入。
 
 ### 非目标
@@ -88,20 +89,36 @@ services + agents + workflow + kernel
   - `apps/*`
   - `@toonflow/workflow`
   - 数据库客户端、repository 实现或入口层私有协议实现
+- `@toonflow/services` 仍负责：
+  - 同名内容域的规范业务用例
+  - 单次业务用例内的事务协调与持久化归属
+  - 对外稳定 DTO 与领域错误归一化
 - `@toonflow/agents` 负责：
   - 单次 Agent 运行协议
   - 统一事件流
   - artifact/result/error 输出边界
   - 运行时依赖注入与上下文接收
+- `@toonflow/agents` 不负责：
+  - 重新定义同名内容域的业务 owner
+  - 替代 `services` 承担正式业务落库与事务边界
 - `@toonflow/workflow` 后续负责：
   - Run 生命周期
   - 状态机推进
   - 暂停 / 恢复 / 重试 / 阶段推进
   - 审核与返工编排
 - `apps/api` 与 `apps/mcp-server` 负责：
-  - 消费统一 Agent 协议
   - 传输层或协议层翻译
+  - 默认保持业务调用面优先消费 `@toonflow/services`
+  - 在 Phase 4 可为显式的单次 Agent 运行场景直接消费统一 Agent 协议
   - 不自定义私有 Agent 运行接口
+
+第 4 阶段需要明确两层入口关系：
+
+- 阶段性允许路径：
+  - `apps/api` / `apps/mcp-server` 可直接消费 `@toonflow/agents`，但仅限单次 Agent 运行验证、流式过程暴露或非 workflow 的窄场景。
+- 长期主路径：
+  - 常规业务接口继续以 `@toonflow/services` 为主调用面。
+  - 内容生产主链在 Phase 5 之后应优先由 `@toonflow/workflow` 组合并驱动 `@toonflow/agents`。
 
 第 4 阶段的表述重点应是“建立统一 Agent 运行时”，而不是“把入口层里的 Agent 调用代码搬到 package”。
 
@@ -124,12 +141,12 @@ services + agents + workflow + kernel
 每节承担的角色如下：
 
 - `定位`：明确第 4 阶段是 `packages/agents` 阶段，不再沿用入口层调用封装叙事。
-- `目标`：写清统一 Agent 运行时、首批五类 Agent 和多入口消费三项目标。
+- `目标`：写清统一 Agent 运行时、首批五类 Agent，以及 `services` / `agents` / `workflow` 的协作边界。
 - `范围`：限定为单次 Agent 运行协议、事件流、artifact/result 边界与运行时依赖注入。
 - `非目标`：排除工作流状态机、run 生命周期、传输层协议适配与方法级设计。
-- `关键决策`：固定运行时硬边界、依赖方向和多入口统一消费原则。
+- `关键决策`：固定运行时硬边界、业务 owner 边界、依赖方向和主路径 / 允许路径原则。
 - `Agent 运行时职责与相邻阶段边界`：一次写清 `services`、`agents`、`workflow`、`apps/api`、`apps/mcp-server` 的责任切分。
-- `集成方式`：描述 `services + ai-providers + storage + kernel -> agents -> apps/api / apps/mcp-server / workflow` 的最小接入关系。
+- `集成方式`：同时描述 `services -> apps/api / apps/mcp-server` 的现有主路径、`agents` 的阶段性允许路径，以及 Phase 5 后 `workflow -> agents` 的主链接入关系。
 - `首批交付基线`：强调首批只要求建立统一运行协议与五类 Agent 分组，不要求提前实现工作流调度。
 - `交付物`：列出阶段文档和详细 spec 两层文档。
 - `验收标准`：以边界清晰、依赖方向一致、首批范围明确、统一协议可被多入口消费为准。
@@ -157,11 +174,11 @@ services + agents + workflow + kernel
 
 - `包边界与依赖规则`：锁定允许和禁止依赖，避免 `agents` 回流依赖入口层或提前依赖 `workflow`。
 - `建议目录结构`：只定义包内分层，不定义每个 Agent 的方法表。
-- `首批 Agent 分组`：按运行时场景描述五类 Agent 的职责边界，而不是列出方法签名。
-- `Agent 运行时职责模型`：明确 Agent 负责单次运行、事件输出、artifact/result 生成，不负责 run 生命周期。
+- `首批 Agent 分组`：按运行时场景描述五类 Agent 的职责边界，并明确其与同名 service 的协作关系，而不是列出方法签名。
+- `Agent 运行时职责模型`：明确 Agent 负责单次运行、事件输出、artifact/result 生成，不负责同名领域用例 owner 与 run 生命周期。
 - `AgentContext 与依赖注入边界`：固定数据访问经 `services`，模型调用与产物读写可直连 `ai-providers` / `storage`。
 - `统一事件协议与结果边界`：锁定 `run()` / `stream()`、事件类别、artifact/result/error 语义。
-- `多入口消费与最小接入方式`：固定 `apps/api`、`apps/mcp-server`、`workflow` 对 Agent 运行时的消费关系。
+- `多入口消费与最小接入方式`：固定 `apps/api`、`apps/mcp-server`、`workflow` 对 Agent 运行时的主路径与允许路径。
 - `错误模型与中断语义`：限定错误归一化和中断语义，但不扩展成 workflow 恢复机制。
 - `测试与验证基线`：要求 Agent 运行时可脱离入口层独立测试。
 
@@ -170,21 +187,26 @@ services + agents + workflow + kernel
 第 4 阶段的首批 Agent 分组固定为以下五组：
 
 - `outline agent`
-  - 负责大纲生成类单次运行场景。
+  - 负责大纲域的 Agent 运行封装，包括上下文装配、模型交互、事件输出与 artifact/result 归一化。
+  - 不替代 `outline service` 对大纲创建、更新、版本管理与正式业务落库的 owner 身份。
 - `script agent`
-  - 负责剧本生成类单次运行场景。
+  - 负责剧本域的 Agent 运行封装，包括单次运行过程中的流式事件与结果整理。
+  - 不替代 `script service` 对剧本读写、结构化整理与生成类业务用例的 owner 身份。
 - `storyboard agent`
-  - 负责分镜生成类单次运行场景。
+  - 负责分镜域的 Agent 运行封装，包括分镜生成过程中的运行时编排与输出归一化。
+  - 不替代 `storyboard service` 对分镜读写、结构组织与正式落库的 owner 身份。
 - `assets agent`
-  - 负责素材生成类单次运行场景。
+  - 负责素材域的 Agent 运行封装，包括素材生成过程中的事件流、artifact 暴露与结果整理。
+  - 不替代 `assets service` 对素材组织、存储登记与生成类业务用例的 owner 身份。
 - `video agent`
-  - 负责视频生成类单次运行场景。
+  - 负责视频域的 Agent 运行封装，包括视频生成请求执行、运行事件与结果聚合。
+  - 不替代 `video service` 对视频请求记录、结果引用与业务协同的 owner 身份。
 
 这些分组在文档中应描述到“运行时职责边界”粒度，而不是方法清单或工作流阶段定义。共同原则如下：
 
 - 每组 Agent 围绕一个明确内容生产场景组织，而不是围绕入口层协议或路由动作命名。
 - 每组 Agent 都可以在单次运行中组合 `services + ai-providers + storage + kernel`。
-- 每组 Agent 都应明确哪些职责属于本组，哪些职责应留给 `workflow` 或入口层消费者。
+- 每组 Agent 都应明确哪些职责属于本组，哪些职责仍归同名 service，哪些职责应留给 `workflow` 或入口层消费者。
 - 首批分组是最小运行时基线，不等于未来所有 Agent 类型的完整名单。
 
 ## `AgentContext`、依赖注入与多入口消费
@@ -196,7 +218,9 @@ services + agents + workflow + kernel
 - 数据访问必须经 `@toonflow/services` 暴露的领域接口完成，Agent 不直接依赖 repository 或数据库客户端。
 - Agent 可以直接依赖 `@toonflow/ai-providers` 与 `@toonflow/storage` 完成模型调用和产物读写。
 - 包内不允许隐式全局单例、导入即初始化或入口层私有上下文对象。
-- `apps/api`、`apps/mcp-server` 与未来 `workflow` 都应消费同一套 Agent 运行时协议，而不是各自定义私有 Agent 接口。
+- `@toonflow/agents` 对外只暴露一套统一协议；`apps/api`、`apps/mcp-server`、`workflow` 如需接入，必须复用该协议，而不是各自定义私有 Agent 接口。
+- Phase 4 中 `apps/api` 的常规业务入口仍以 `@toonflow/services` 为默认调用面；直连 Agent 只用于显式单次运行场景。
+- Phase 5 之后，内容生产主链应优先由 `workflow` 作为上层编排者接入 Agent 运行时。
 
 ## 统一事件协议与输出边界
 
