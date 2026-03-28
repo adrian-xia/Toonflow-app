@@ -37,8 +37,10 @@
 - 同名内容域的业务 owner 仍然是 `@toonflow/services`；同名 Agent 表示该内容域在 Agent 运行时中的统一封装，不替代 service 对单次业务用例、事务与持久化的归属。
 - 第 4 阶段明确采用硬边界：run 生命周期、状态机推进、暂停/恢复/重试、审核回退和阶段推进职责留给第 5 阶段 `workflow`。
 - `@toonflow/agents` 保持与架构总览一致的依赖方向：可依赖 `@toonflow/services`、`@toonflow/ai-providers`、`@toonflow/storage`、`@toonflow/kernel`；数据访问经 `services`，运行时模型调用与产物读写可直连 `ai-providers` / `storage`。
+- `AgentContext` 中可注入的 `services` 能力仅限只读查询门面；Agent 运行内部不得调用会产生领域写入副作用的 service 用例。
 - `@toonflow/agents` 直连 `storage` 的前提是仅处理 run-scope artifact；任何进入领域持久化体系的记录创建、版本更新、资产登记都不属于 Agent 运行时职责。
 - `@toonflow/agents` 对外暴露统一协议面，可被 `apps/api`、`apps/mcp-server` 与后续 `workflow` 复用；但“谁在什么场景下直接调用 Agent”必须按阶段边界区分主路径与允许路径。
+- Phase 4 允许直连 Agent 的入口必须是与正式业务调用面隔离的 `internal/preview/debug` 性质入口；正式业务接口不得导入 `@toonflow/agents`。
 - 第 4 阶段不承诺完整工作流调度，也不下沉到每个 Agent 的方法级设计。
 
 ## 目标与非目标
@@ -130,6 +132,7 @@ services + agents + workflow + kernel
 
 - 阶段性允许路径：
   - `apps/api` / `apps/mcp-server` 可直接消费 `@toonflow/agents`，但仅限显式的单次 Agent 运行场景，例如预览生成、流式调试、tool-style 调用。
+  - 这类入口必须与正式业务调用面做硬隔离，文档口径固定为 `internal/preview/debug` 性质入口，而不是常规 route/controller。
   - 这类直连调用只允许返回统一事件、run-scope artifact 引用与结构化 result，不允许直接改变项目、内容域或资产登记状态。
   - 如果某次调用需要创建 / 更新领域记录、沉淀正式版本、登记资产或推进项目阶段，则该调用不属于直连 Agent 场景。
 - 长期主路径：
@@ -162,7 +165,7 @@ services + agents + workflow + kernel
 - `非目标`：排除工作流状态机、run 生命周期、传输层协议适配与方法级设计。
 - `关键决策`：固定运行时硬边界、业务 owner 边界、依赖方向和主路径 / 允许路径原则。
 - `Agent 运行时职责与相邻阶段边界`：一次写清 `services`、`agents`、`workflow`、`apps/api`、`apps/mcp-server` 的责任切分。
-- `集成方式`：同时描述 `services -> apps/api / apps/mcp-server` 的现有主路径、`agents` 的阶段性允许路径，以及 Phase 5 后 `workflow -> agents` 的主链接入关系。
+- `集成方式`：同时描述 `services -> apps/api / apps/mcp-server` 的现有主路径、隔离的 `internal/preview/debug -> agents` 允许路径，以及 Phase 5 后 `workflow -> agents` 的主链接入关系。
 - `首批交付基线`：强调首批只要求建立统一运行协议与五类 Agent 分组，不要求提前实现工作流调度。
 - `交付物`：列出阶段文档和详细 spec 两层文档。
 - `验收标准`：以边界清晰、依赖方向一致、首批范围明确、统一协议可被多入口消费为准。
@@ -192,9 +195,9 @@ services + agents + workflow + kernel
 - `建议目录结构`：只定义包内分层，不定义每个 Agent 的方法表。
 - `首批 Agent 分组`：按运行时场景描述五类 Agent 的职责边界，并明确其与同名 service 的协作关系，而不是列出方法签名。
 - `Agent 运行时职责模型`：明确 Agent 负责单次运行、事件输出、artifact/result 生成，不负责同名领域用例 owner 与 run 生命周期。
-- `AgentContext 与依赖注入边界`：固定数据访问经 `services`，模型调用与产物读写可直连 `ai-providers` / `storage`。
+- `AgentContext 与依赖注入边界`：固定数据访问经 `services` 的只读查询门面，模型调用与 run-scope 产物读写可直连 `ai-providers` / `storage`。
 - `统一事件协议与结果边界`：锁定 `run()` / `stream()`、事件类别，以及 run-scope artifact / result / error 的稳定语义。
-- `多入口消费与最小接入方式`：固定 `apps/api`、`apps/mcp-server`、`workflow` 对 Agent 运行时的主路径与允许路径。
+- `多入口消费与最小接入方式`：固定 `apps/api`、`apps/mcp-server`、`workflow` 对 Agent 运行时的主路径与允许路径，以及直连入口的隔离规则。
 - `错误模型与中断语义`：限定错误归一化和中断语义，但不扩展成 workflow 恢复机制。
 - `测试与验证基线`：要求 Agent 运行时可脱离入口层独立测试。
 
@@ -233,6 +236,8 @@ services + agents + workflow + kernel
 关键约束如下：
 
 - 数据访问必须经 `@toonflow/services` 暴露的领域接口完成，Agent 不直接依赖 repository 或数据库客户端。
+- `AgentContext` 中注入的 `services` 能力应收敛为 `read/query` 性质的门面，用于读取项目、内容域和已登记资源的稳定视图。
+- `agent run` 内不得调用会触发领域写入、副作用提交、版本创建或资产登记的 service 用例；这类提交动作只能发生在 Agent 运行外层。
 - Agent 可以直接依赖 `@toonflow/ai-providers` 完成模型调用，并可直连 `@toonflow/storage` 写入 run-scope artifact。
 - 任何领域状态读取都通过 `services` 暴露的接口完成；任何需要沉淀为正式领域记录、版本或资产登记的动作，都不在 Agent 运行时内完成。
 - 包内不允许隐式全局单例、导入即初始化或入口层私有上下文对象。
@@ -262,11 +267,11 @@ services + agents + workflow + kernel
 为了让 planning 能直接落地，本设计把入口消费规则固定为以下可执行约束：
 
 - `apps/api`
-  - 允许：面向预览、调试、内部工具的单次 Agent 运行入口，可直接调用 `run()` / `stream()`。
-  - 禁止：把直连 Agent 作为大纲、剧本、分镜、素材、视频等正式业务接口的默认实现；禁止在直连路径中落库、登记资产或推进项目状态。
+  - 允许：仅在 `internal/preview/debug` 性质的隔离入口中提供单次 Agent 运行能力，可直接调用 `run()` / `stream()`。
+  - 禁止：常规 route/controller、正式业务接口、对外稳定 API 导入 `@toonflow/agents`；禁止把直连 Agent 作为大纲、剧本、分镜、素材、视频等正式业务接口的默认实现；禁止在直连路径中落库、登记资产或推进项目状态。
 - `apps/mcp-server`
-  - 允许：tool-style 的单次 Agent 调用，返回统一事件、result 与 run-scope artifact 引用。
-  - 禁止：在 MCP 直连 Agent 路径中隐式创建 / 更新领域记录或承接长流程推进。
+  - 允许：仅在 `internal/preview/debug` 性质的 tool-style 入口中提供单次 Agent 调用，返回统一事件、result 与 run-scope artifact 引用。
+  - 禁止：把直连 Agent 暴露为正式领域提交接口；禁止在 MCP 直连 Agent 路径中隐式创建 / 更新领域记录或承接长流程推进。
 - `workflow`
   - Phase 4：不在本阶段展开实现，但保留未来作为主链编排入口的对接位置。
   - Phase 5：成为内容生产主链的首选上层入口，负责组合 Agent 运行、领域提交与阶段推进。
