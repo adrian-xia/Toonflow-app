@@ -8,12 +8,14 @@
 ## 目标
 
 - 建立 `@toonflow/agents` 的单次 agent run 协议与统一事件流
-- 明确 `artifact` / `result` 的边界与语义，形成稳定的输出契约
+- 明确 `artifact` / `result` 的边界与语义（run-scope，不隐含持久化），形成稳定的输出契约
 - 建立依赖注入与运行时装配方式，保证跨入口复用
 
 ## 范围
 
 - `@toonflow/agents` 负责单次 agent run 的执行契约、统一事件流与 `artifact` / `result` 输出边界
+- `artifact` / `result` 默认仅代表本次运行（run-scope）结果，不隐含持久化、正式版本提交或资产登记
+- 如需沉淀，必须由外层 `services` 或 `workflow + services` 显式完成
 - 首批范围只覆盖 `outline / script / storyboard / assets / video`
 - `@toonflow/services` 仍负责业务用例、事务与持久化归属
 
@@ -27,6 +29,8 @@
 
 - `@toonflow/agents` 可依赖 `@toonflow/services`、`@toonflow/ai-providers`、`@toonflow/storage`、`@toonflow/kernel`
 - `services` 是同名内容域的业务 owner，`agents` 不是同名 service 的替代者
+- `artifact` / `result` 仅为 run-scope 结果，不代表落库、版本提交或资产登记
+- 需要沉淀时必须由外层 `services` 或 `workflow + services` 显式完成
 - `AgentContext.services` 只允许 `read/query` 读查询门面，`agent run` 不允许通过 services 间接落库
 - 这里仅指读取项目、内容域与已登记资源的稳定视图，具体接口细则由本阶段详细设计文档统一定义
 
@@ -59,7 +63,7 @@
 - 边界清晰：`@toonflow/agents` 与 `@toonflow/services`、`workflow` 的职责切分可核对
 - 依赖方向一致：依赖允许清单与装配口径一致
 - 主路径与允许路径清晰：常规业务调用面走 `services`，`internal/preview/debug` 直连受控
-- `artifact` / `result` 语义稳定，可被多入口一致消费
+- `artifact` / `result` 语义稳定，可被多入口一致消费且明确 run-scope 边界
 
 ## 风险与注意事项
 
