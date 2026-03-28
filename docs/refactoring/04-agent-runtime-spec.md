@@ -123,12 +123,54 @@ packages/agents/
 约束如下：
 
 - 数据访问必须经 `services` 暴露的只读查询门面完成，限定为 `read/query` 性质的稳定视图。
+- `read/query` 的最小判定标准是不改变领域状态、无持久化副作用。
 - `agent run` 禁止调用会写库、提交副作用、创建版本、登记资产的 service 用例，任何领域写入只能发生在运行外层。
 - 模型调用可直连 `@toonflow/ai-providers`。
 - run-scope 产物写入可直连 `@toonflow/storage`。
 - 不允许隐式全局单例、导入即初始化或入口层私有上下文对象。
 ## 9. 统一事件协议与结果边界
+`@toonflow/agents` 必须对外暴露统一事件协议与稳定输出边界，避免入口层各自定义私有事件或回调形态。
+
+约束如下：
+
+- `@toonflow/agents` 对外只提供 `run()` 与 `stream()`。
+- `run()` 与 `stream()` 共享同一输入边界和主要错误语义，只在输出方式上区分。
+- 统一事件协议至少覆盖 `progress`、`artifact`、`result`、`error` 四类稳定事件。
+- `artifact` 是 run-scope 产物，可携带存储引用，但默认不等于领域资产记录或正式版本。
+- `result` 是最终结构化结果，可引用本次运行产出的 artifact，但不隐含持久化已完成。
+- 如需把 artifact/result 沉淀为正式领域数据，必须由外层 `services` 或 `workflow + services` 显式完成。
+- 入口层不得依赖某个 Agent 私有事件名或某个 SDK 的原始回调形态。
 ## 10. 多入口消费与最小接入方式
+多入口消费必须遵循“主路径服务化、直连入口隔离化”的原则，避免把直连 Agent 作为正式业务接口默认实现。
+
+约束如下：
+
+- `apps/api` 常规业务接口继续以 `@toonflow/services` 为主调用面。
+- 只有隔离的 `internal/preview/debug` 入口允许直连 `@toonflow/agents`。
+- 正式业务接口、常规 route/controller、对外稳定 API 不得导入 `@toonflow/agents`。
+- `apps/mcp-server` 只允许在隔离的 tool-style 入口中直连 Agent。
+- 任何直连 Agent 的入口都禁止落库、登记资产、创建正式版本或推进项目状态。
+- Phase 5 后内容生产主链由 `workflow` 作为上层编排入口。
 ## 11. 错误模型与中断语义
+错误模型需保持与 `@toonflow/kernel` 一致，确保不同入口消费到的是同一套稳定错误语义与中断语义。
+
+约束如下：
+
+- 错误语义优先复用 `@toonflow/kernel`。
+- 对外暴露统一错误语义和中断语义，不透传底层 provider / storage 原始异常原文。
+- `run()` 与 `stream()` 共享错误分类与中断语义，入口层只处理统一错误码与稳定字段。
 ## 12. 测试与验证基线
+`@toonflow/agents` 必须能够脱离入口层独立验证，确保事件协议与结果边界稳定可复用。
+
+基线要求如下：
+
+- `@toonflow/agents` 可脱离入口层独立验证。
+- AI 生成型 Agent 默认以 stub/mock provider 为验证基线。
+- 验证重点覆盖依赖注入正确、事件协议稳定、artifact/result 边界清晰、入口消费隔离明确。
 ## 13. 实施范围与衔接
+本轮仅完成 Phase 4 文档层面的详细设计约束，不提前下沉 Phase 5 的状态机职责。
+
+约束如下：
+
+- 本轮实施范围仅限重写 `04-agent-runtime.md` 与新增 `04-agent-runtime-spec.md`。
+- Phase 5 继续承接 workflow 状态机、重试、暂停恢复、审核返工与主链编排。
