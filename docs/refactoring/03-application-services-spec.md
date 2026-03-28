@@ -119,7 +119,7 @@ packages/services/
 
 - `services` 负责领域用例执行、事务协调、单次业务用例内编排。
 - `services` 不负责 HTTP 参数解析、JWT、SSE/WebSocket、日志中间件。
-- `apps/api` 负责参数校验、错误映射、响应封装与传输层适配，并作为启动期的 composition root 完成依赖装配。
+- `apps/api` 负责参数校验、错误映射、响应封装与传输层适配，并保持业务调用面只消费 `@toonflow/services`。
 - `services` 不提前承接 Agent 运行时与长流程工作流（`agents` / `workflow`）的职责。
 
 ## 8. 输入输出与 DTO 边界
