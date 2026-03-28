@@ -348,7 +348,7 @@ git commit -m "docs: 完成 phase 4 详细设计约束"
 - 修改：`docs/refactoring/04-agent-runtime-spec.md`
 - 参考：`docs/superpowers/specs/2026-03-28-agent-runtime-design.md`
 
-- [ ] **步骤 1：全文检查是否残留旧叙事、旧接口片段与占位内容**
+- [x] **步骤 1：全文检查是否残留旧叙事、旧接口片段与占位内容**
 
 运行：
 
@@ -362,7 +362,7 @@ rg -n "WebSocket|AsyncGenerator|toolCall|ServiceRegistry|DbClient|Logger|未来 
 - 不存在 `TODO` 或 `TBD`
 - 不再把第 4 阶段写回“入口层协议翻译代码示例”风格
 
-- [ ] **步骤 2：核对两份文档与设计稿口径一致**
+- [x] **步骤 2：核对两份文档与设计稿口径一致**
 
 运行：
 
@@ -376,7 +376,7 @@ rg -n "@toonflow/agents|@toonflow/services|internal/preview/debug|outline|script
 - 五组 Agent、`agent run` / `workflow run`、`artifact` / `result`、`read/query` 门面都完整出现
 - 没有把正式业务主路径写成直连 Agent
 
-- [ ] **步骤 3：执行文档级格式检查**
+- [x] **步骤 3：执行文档级格式检查**
 
 运行：
 
@@ -388,7 +388,7 @@ git diff --check
 
 - 无尾随空格、冲突标记或补丁格式错误
 
-- [ ] **步骤 4：人工通读关键段落**
+- [x] **步骤 4：人工通读关键段落**
 
 通读以下文件并确认三点：
 
@@ -403,7 +403,7 @@ sed -n '1,360p' docs/refactoring/04-agent-runtime-spec.md
 - 详细设计文档不漂移回业务 owner 或 workflow 设计
 - `services` / `agents` / `workflow` 的边界、`artifact/result` 语义、入口隔离规则表述一致
 
-- [ ] **步骤 5：如仍有未提交改动，提交最终收尾**
+- [x] **步骤 5：如仍有未提交改动，提交最终收尾**
 
 ```bash
 git add docs/refactoring/04-agent-runtime.md docs/refactoring/04-agent-runtime-spec.md
