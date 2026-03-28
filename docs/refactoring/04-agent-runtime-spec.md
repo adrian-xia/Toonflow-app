@@ -53,11 +53,6 @@ packages/agents/
 │   ├── events/
 │   ├── runtime/
 │   ├── agents/
-│   │   ├── outline/
-│   │   ├── script/
-│   │   ├── storyboard/
-│   │   ├── assets/
-│   │   └── video/
 │   └── testing/
 ├── package.json
 └── tsconfig.json
