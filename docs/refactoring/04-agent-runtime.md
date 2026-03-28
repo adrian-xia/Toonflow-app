@@ -28,7 +28,7 @@
 - `@toonflow/agents` 可依赖 `@toonflow/services`、`@toonflow/ai-providers`、`@toonflow/storage`、`@toonflow/kernel`
 - `services` 是同名内容域的业务 owner，`agents` 不是同名 service 的替代者
 - `AgentContext.services` 只允许读查询门面，`agent run` 不允许通过 services 间接落库
-- 这里仅指读取项目、内容域与已登记资源的稳定视图，具体接口细则见 `04-agent-runtime-spec.md`
+- 这里仅指读取项目、内容域与已登记资源的稳定视图，具体接口细则由本阶段详细设计文档统一定义
 
 ## Agent 运行时职责与相邻阶段边界
 
@@ -41,6 +41,7 @@
 
 - `apps/api` / `apps/mcp-server` 的常规业务调用面继续优先消费 `@toonflow/services`
 - Phase 4 只允许隔离的 `internal/preview/debug` 入口直连 `@toonflow/agents`，作为非正式业务调用面、非公开稳定 API 面
+- 允许的场景示例包括预览生成、流式调试与 tool-style 的单次 agent run 请求
 - 正式业务接口与常规 route/controller 不得走这条路径，创建/更新领域记录、登记资产、推进项目状态的请求不属于允许范围
 - 内容生产主链在 Phase 5 后应由 `@toonflow/workflow` 组合驱动 `@toonflow/agents`
 
