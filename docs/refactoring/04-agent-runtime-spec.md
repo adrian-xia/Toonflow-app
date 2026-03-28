@@ -30,7 +30,11 @@
 ### 4.1 允许依赖
 
 - `@toonflow/agents` 允许依赖 `@toonflow/kernel`、`@toonflow/services`、`@toonflow/ai-providers`、`@toonflow/storage`，即 `kernel/services/ai-providers/storage` 组合。
+- 上述依赖对应 [`architecture-overview.md`](./architecture-overview.md) 中定义的共享包边界，是本阶段对齐目标架构的依赖口径。
 - 允许在单次 Agent 运行内组合 `services + ai-providers + storage`，但仅限 run-scope 读取与产物处理。
+  - `run-scope 读取` 指通过只读查询门面读取项目、内容域和已登记资源的稳定视图。
+  - `产物处理` 指本次运行内的 artifact 读写与引用整理。
+  - 不包含领域记录创建/更新、正式版本提交、资产登记。
 
 ### 4.2 禁止依赖
 
@@ -53,7 +57,7 @@ packages/agents/
 │   ├── events/
 │   ├── runtime/
 │   ├── agents/
-│   └── testing/
+├── test/
 ├── package.json
 └── tsconfig.json
 ```
