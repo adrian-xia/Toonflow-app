@@ -43,6 +43,7 @@
 - `@toonflow/agents` 负责单次运行执行与统一事件输出，不拥有主链状态机与审核返工规则。
 - `apps/api` / `apps/mcp-server` 只做命令、查询与事件转发，不重写状态机规则。
 - `review-console` 只负责消费审核任务与提交审核决定，返工路径由 workflow 判定并执行。
+- 与第 6 阶段入口层衔接遵循 [`06-api-gateway.md`](./06-api-gateway.md) 的网关边界，不把入口层协议适配职责回流到 workflow。
 
 ## 集成方式
 
