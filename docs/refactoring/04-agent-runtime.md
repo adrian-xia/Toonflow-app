@@ -27,14 +27,14 @@
 
 - `@toonflow/agents` 可依赖 `@toonflow/services`、`@toonflow/ai-providers`、`@toonflow/storage`、`@toonflow/kernel`
 - `services` 是同名内容域的业务 owner，`agents` 不是同名 service 的替代者
-- `AgentContext.services` 只允许读查询门面，`agent run` 不允许通过 services 间接落库
+- `AgentContext.services` 只允许 `read/query` 读查询门面，`agent run` 不允许通过 services 间接落库
 - 这里仅指读取项目、内容域与已登记资源的稳定视图，具体接口细则由本阶段详细设计文档统一定义
 
 ## Agent 运行时职责与相邻阶段边界
 
 - `@toonflow/agents` 聚焦单次 agent run 执行、统一事件流与 `artifact` / `result` 输出语义
 - `@toonflow/services` 负责业务用例、事务与持久化归属，仍是业务入口调用的默认依赖
-- `@toonflow/workflow` 在 Phase 5 负责长流程编排与阶段推进，本阶段不提前设计 workflow
+- `@toonflow/workflow` 在 Phase 5 负责 `workflow run` 的长流程编排与阶段推进，本阶段不提前设计 workflow
 - 传输层协议与入口层适配留在 `apps/api` / `apps/mcp-server`，不下沉到 `@toonflow/agents`
 
 ## 集成方式
