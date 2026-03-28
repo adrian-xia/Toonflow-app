@@ -116,7 +116,6 @@ packages/agents/
 
 - `@toonflow/agents` 负责单次运行协议、统一事件流与 artifact/result/error 的输出边界。
 - `@toonflow/agents` 不负责领域写入、版本创建、资产登记，也不负责 run 生命周期或状态机推进。
-- `artifact` 与 `result` 默认只代表本次 `agent run` 的结果，不自动等同于正式领域数据或已登记资产；如需沉淀，必须由 `services` 或 `workflow` + `services` 显式完成。
 ## 8. AgentContext 与依赖注入边界
 `AgentContext` 是 Agent 运行时唯一的依赖注入入口，负责显式提供运行所需的稳定依赖集合。
 
@@ -133,7 +132,8 @@ packages/agents/
 
 约束如下：
 
-- `@toonflow/agents` 对外只提供 `run()` 与 `stream()`。
+- `run()` / `stream()` 是对外稳定运行入口。
+- 其余公共导出仅限类型、契约、上下文构造辅助等支撑性导出。
 - `run()` 与 `stream()` 共享同一输入边界和主要错误语义，只在输出方式上区分。
 - 统一事件协议至少覆盖 `progress`、`artifact`、`result`、`error` 四类稳定事件。
 - `artifact` 是 run-scope 产物，可携带存储引用，但默认不等于领域资产记录或正式版本。
@@ -157,8 +157,10 @@ packages/agents/
 约束如下：
 
 - 错误语义优先复用 `@toonflow/kernel`。
+- 取消 / 超时 / 上游中断需归一为统一的中断类别。
+- `run()` 与 `stream()` 共享同类错误对象、错误分类与稳定字段口径。
+- 入口层依赖统一错误码、错误类别、是否中断等稳定信息，不依赖底层异常原文。
 - 对外暴露统一错误语义和中断语义，不透传底层 provider / storage 原始异常原文。
-- `run()` 与 `stream()` 共享错误分类与中断语义，入口层只处理统一错误码与稳定字段。
 ## 12. 测试与验证基线
 `@toonflow/agents` 必须能够脱离入口层独立验证，确保事件协议与结果边界稳定可复用。
 
@@ -167,10 +169,14 @@ packages/agents/
 - `@toonflow/agents` 可脱离入口层独立验证。
 - AI 生成型 Agent 默认以 stub/mock provider 为验证基线。
 - 验证重点覆盖依赖注入正确、事件协议稳定、artifact/result 边界清晰、入口消费隔离明确。
+- 事件类型集合与基本顺序/结束语义可验证。
+- `run()` / `stream()` 的错误归一口径一致。
+- artifact/result 不隐含持久化已完成。
+- 入口隔离与依赖注入边界可验证。
 ## 13. 实施范围与衔接
-本轮仅完成 Phase 4 文档层面的详细设计约束，不提前下沉 Phase 5 的状态机职责。
+Phase 4 交付范围仅完成文档层面的详细设计约束，不提前下沉 Phase 5 的状态机职责。
 
 约束如下：
 
-- 本轮实施范围仅限重写 `04-agent-runtime.md` 与新增 `04-agent-runtime-spec.md`。
+- Phase 4 交付范围仅限重写 `04-agent-runtime.md` 与新增 `04-agent-runtime-spec.md`。
 - Phase 5 继续承接 workflow 状态机、重试、暂停恢复、审核返工与主链编排。
