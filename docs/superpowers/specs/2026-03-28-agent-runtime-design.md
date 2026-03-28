@@ -16,6 +16,18 @@
 
 本文档服务于后续实施计划，不承担旧入口层 Agent 调用封装说明的职责，也不把第 4 阶段提前扩写为工作流引擎设计。
 
+## 术语约定
+
+为避免后续 planning 混淆，本设计固定使用以下三类术语：
+
+- `业务用例（use case）`
+  - 指由 `@toonflow/services` 持有的领域级操作，负责领域状态读写、事务协调、持久化归属与稳定 DTO。
+- `Agent 运行（agent run）`
+  - 指 `@toonflow/agents` 内一次 `run()` 或 `stream()` 调用，负责上下文装配、模型交互、统一事件输出以及 run-scope 的 artifact/result 产出。
+  - `agent run` 本身不创建、不更新领域记录，也不完成正式资产登记。
+- `工作流运行（workflow run）`
+  - 指 `@toonflow/workflow` 对多个 `agent run` 或相关步骤的上层编排，负责阶段推进、状态机、重试、暂停恢复与审核返工。
+
 ## 核心决策
 
 - 第 4 阶段采用与第 2、3 阶段一致的双层文档结构：阶段说明文档负责阶段边界，详细设计文档负责运行时约束。
@@ -25,6 +37,7 @@
 - 同名内容域的业务 owner 仍然是 `@toonflow/services`；同名 Agent 表示该内容域在 Agent 运行时中的统一封装，不替代 service 对单次业务用例、事务与持久化的归属。
 - 第 4 阶段明确采用硬边界：run 生命周期、状态机推进、暂停/恢复/重试、审核回退和阶段推进职责留给第 5 阶段 `workflow`。
 - `@toonflow/agents` 保持与架构总览一致的依赖方向：可依赖 `@toonflow/services`、`@toonflow/ai-providers`、`@toonflow/storage`、`@toonflow/kernel`；数据访问经 `services`，运行时模型调用与产物读写可直连 `ai-providers` / `storage`。
+- `@toonflow/agents` 直连 `storage` 的前提是仅处理 run-scope artifact；任何进入领域持久化体系的记录创建、版本更新、资产登记都不属于 Agent 运行时职责。
 - `@toonflow/agents` 对外暴露统一协议面，可被 `apps/api`、`apps/mcp-server` 与后续 `workflow` 复用；但“谁在什么场景下直接调用 Agent”必须按阶段边界区分主路径与允许路径。
 - 第 4 阶段不承诺完整工作流调度，也不下沉到每个 Agent 的方法级设计。
 
@@ -101,6 +114,7 @@ services + agents + workflow + kernel
 - `@toonflow/agents` 不负责：
   - 重新定义同名内容域的业务 owner
   - 替代 `services` 承担正式业务落库与事务边界
+  - 创建 / 更新领域记录、版本或资产登记
 - `@toonflow/workflow` 后续负责：
   - Run 生命周期
   - 状态机推进
@@ -115,7 +129,9 @@ services + agents + workflow + kernel
 第 4 阶段需要明确两层入口关系：
 
 - 阶段性允许路径：
-  - `apps/api` / `apps/mcp-server` 可直接消费 `@toonflow/agents`，但仅限单次 Agent 运行验证、流式过程暴露或非 workflow 的窄场景。
+  - `apps/api` / `apps/mcp-server` 可直接消费 `@toonflow/agents`，但仅限显式的单次 Agent 运行场景，例如预览生成、流式调试、tool-style 调用。
+  - 这类直连调用只允许返回统一事件、run-scope artifact 引用与结构化 result，不允许直接改变项目、内容域或资产登记状态。
+  - 如果某次调用需要创建 / 更新领域记录、沉淀正式版本、登记资产或推进项目阶段，则该调用不属于直连 Agent 场景。
 - 长期主路径：
   - 常规业务接口继续以 `@toonflow/services` 为主调用面。
   - 内容生产主链在 Phase 5 之后应优先由 `@toonflow/workflow` 组合并驱动 `@toonflow/agents`。
@@ -177,7 +193,7 @@ services + agents + workflow + kernel
 - `首批 Agent 分组`：按运行时场景描述五类 Agent 的职责边界，并明确其与同名 service 的协作关系，而不是列出方法签名。
 - `Agent 运行时职责模型`：明确 Agent 负责单次运行、事件输出、artifact/result 生成，不负责同名领域用例 owner 与 run 生命周期。
 - `AgentContext 与依赖注入边界`：固定数据访问经 `services`，模型调用与产物读写可直连 `ai-providers` / `storage`。
-- `统一事件协议与结果边界`：锁定 `run()` / `stream()`、事件类别、artifact/result/error 语义。
+- `统一事件协议与结果边界`：锁定 `run()` / `stream()`、事件类别，以及 run-scope artifact / result / error 的稳定语义。
 - `多入口消费与最小接入方式`：固定 `apps/api`、`apps/mcp-server`、`workflow` 对 Agent 运行时的主路径与允许路径。
 - `错误模型与中断语义`：限定错误归一化和中断语义，但不扩展成 workflow 恢复机制。
 - `测试与验证基线`：要求 Agent 运行时可脱离入口层独立测试。
@@ -207,6 +223,7 @@ services + agents + workflow + kernel
 - 每组 Agent 围绕一个明确内容生产场景组织，而不是围绕入口层协议或路由动作命名。
 - 每组 Agent 都可以在单次运行中组合 `services + ai-providers + storage + kernel`。
 - 每组 Agent 都应明确哪些职责属于本组，哪些职责仍归同名 service，哪些职责应留给 `workflow` 或入口层消费者。
+- 每组 Agent 输出的 artifact/result 默认只代表本次运行结果，不自动等同于领域正式版本、正式资产或项目阶段状态。
 - 首批分组是最小运行时基线，不等于未来所有 Agent 类型的完整名单。
 
 ## `AgentContext`、依赖注入与多入口消费
@@ -216,10 +233,11 @@ services + agents + workflow + kernel
 关键约束如下：
 
 - 数据访问必须经 `@toonflow/services` 暴露的领域接口完成，Agent 不直接依赖 repository 或数据库客户端。
-- Agent 可以直接依赖 `@toonflow/ai-providers` 与 `@toonflow/storage` 完成模型调用和产物读写。
+- Agent 可以直接依赖 `@toonflow/ai-providers` 完成模型调用，并可直连 `@toonflow/storage` 写入 run-scope artifact。
+- 任何领域状态读取都通过 `services` 暴露的接口完成；任何需要沉淀为正式领域记录、版本或资产登记的动作，都不在 Agent 运行时内完成。
 - 包内不允许隐式全局单例、导入即初始化或入口层私有上下文对象。
 - `@toonflow/agents` 对外只暴露一套统一协议；`apps/api`、`apps/mcp-server`、`workflow` 如需接入，必须复用该协议，而不是各自定义私有 Agent 接口。
-- Phase 4 中 `apps/api` 的常规业务入口仍以 `@toonflow/services` 为默认调用面；直连 Agent 只用于显式单次运行场景。
+- Phase 4 中 `apps/api` 的常规业务入口仍以 `@toonflow/services` 为默认调用面；直连 Agent 只用于显式单次运行场景，且不得作为正式内容生成接口的默认实现。
 - Phase 5 之后，内容生产主链应优先由 `workflow` 作为上层编排者接入 Agent 运行时。
 
 ## 统一事件协议与输出边界
@@ -233,9 +251,25 @@ services + agents + workflow + kernel
 
 - `run()` 与 `stream()` 共享同一输入边界和主要错误语义，只在输出方式上区分。
 - 统一事件协议至少覆盖 `progress`、`artifact`、`result`、`error` 等稳定类别。
-- `artifact` 表示运行过程中产生、可被外部引用或消费的产物；`result` 表示该次 Agent 运行的最终结构化结果。
+- `artifact` 表示本次 `agent run` 过程中产生、可被外部引用或消费的 run-scope 产物；它可以携带存储引用，但默认不等于领域资产记录、正式版本或已登记素材。
+- `result` 表示该次 Agent 运行的最终结构化结果，可引用本次运行产出的 artifact，但不隐含领域持久化已经完成。
+- 如需把 artifact 或 result 沉淀为正式领域数据，必须由外层 `services`（Phase 4 的业务用例）或 `workflow` + `services`（Phase 5 的主链编排）显式完成。
 - 入口层不得依赖某个 Agent 私有事件名或某个 SDK 的原始回调形态。
 - 对外暴露的是统一错误语义和中断语义，而不是底层 provider / 文件系统异常原文。
+
+## Phase 4 / Phase 5 调用路径约束
+
+为了让 planning 能直接落地，本设计把入口消费规则固定为以下可执行约束：
+
+- `apps/api`
+  - 允许：面向预览、调试、内部工具的单次 Agent 运行入口，可直接调用 `run()` / `stream()`。
+  - 禁止：把直连 Agent 作为大纲、剧本、分镜、素材、视频等正式业务接口的默认实现；禁止在直连路径中落库、登记资产或推进项目状态。
+- `apps/mcp-server`
+  - 允许：tool-style 的单次 Agent 调用，返回统一事件、result 与 run-scope artifact 引用。
+  - 禁止：在 MCP 直连 Agent 路径中隐式创建 / 更新领域记录或承接长流程推进。
+- `workflow`
+  - Phase 4：不在本阶段展开实现，但保留未来作为主链编排入口的对接位置。
+  - Phase 5：成为内容生产主链的首选上层入口，负责组合 Agent 运行、领域提交与阶段推进。
 
 ## 对后续实施计划的直接输入
 
