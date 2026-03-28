@@ -176,7 +176,7 @@ packages/services/
 
 ## 13. 实施范围与衔接
 
-本次 Phase 3 文档重构的实施范围仅限重写 `03-application-services.md` 与新增 `03-application-services-spec.md`，不扩展到代码实现或其他阶段文档。
+Phase 3 文档重构的实施范围仅限重写 `03-application-services.md` 与新增 `03-application-services-spec.md`，不扩展到代码实现或其他阶段文档。
 
 衔接说明：
 
