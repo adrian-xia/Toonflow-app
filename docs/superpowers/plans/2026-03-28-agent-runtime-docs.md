@@ -280,7 +280,7 @@ git commit -m "docs: 补全 phase 4 agent 分组与职责边界"
 - 参考：`docs/superpowers/specs/2026-03-28-agent-runtime-design.md`
 - 参考：`docs/refactoring/05-workflow-engine.md`
 
-- [ ] **步骤 1：填写 `统一事件协议与结果边界`**
+- [x] **步骤 1：填写 `统一事件协议与结果边界`**
 
 必须写清：
 
@@ -294,7 +294,7 @@ git commit -m "docs: 补全 phase 4 agent 分组与职责边界"
 - 入口层不得依赖某个 Agent 私有事件名或某个 SDK 的原始回调形态
 ```
 
-- [ ] **步骤 2：填写 `多入口消费与最小接入方式`**
+- [x] **步骤 2：填写 `多入口消费与最小接入方式`**
 
 该章节必须包含以下明确口径：
 
@@ -307,7 +307,7 @@ git commit -m "docs: 补全 phase 4 agent 分组与职责边界"
 - Phase 5 后内容生产主链由 `workflow` 作为上层编排入口
 ```
 
-- [ ] **步骤 3：填写 `错误模型与中断语义`、`测试与验证基线`、`实施范围与衔接`**
+- [x] **步骤 3：填写 `错误模型与中断语义`、`测试与验证基线`、`实施范围与衔接`**
 
 必须写清：
 
@@ -321,7 +321,7 @@ git commit -m "docs: 补全 phase 4 agent 分组与职责边界"
 - Phase 5 继续承接 workflow 状态机、重试、暂停恢复、审核返工与主链编排
 ```
 
-- [ ] **步骤 4：验证事件、入口和测试口径**
+- [x] **步骤 4：验证事件、入口和测试口径**
 
 运行：
 
@@ -334,7 +334,7 @@ rg -n "run\\(\\)|stream\\(\\)|共享同一输入边界|错误语义|progress|art
 - `run()`、`stream()`、共享输入/错误边界、四类稳定事件、禁止私有事件/原始回调、`internal/preview/debug`、直连入口禁止项、`stub/mock`、`@toonflow/kernel`、`Phase 5` 都能检索到
 - 没有把正式业务接口写成默认直连 Agent
 
-- [ ] **步骤 5：提交事件协议与验证章节**
+- [x] **步骤 5：提交事件协议与验证章节**
 
 ```bash
 git add docs/refactoring/04-agent-runtime-spec.md
