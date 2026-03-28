@@ -1,115 +1,67 @@
-# Phase 4: Agent 运行时提取 (`@toonflow/agents`)
+# Phase 4: Agent 运行时 (`@toonflow/agents`)
+
+## 定位
+
+- 第 4 阶段是 `packages/agents` 的共享 Agent 运行时阶段，不是入口层 Agent 调用封装迁移
+- 聚焦单次 agent run 的统一运行时边界与可复用协议，为 Phase 5 的 `workflow` 组合铺底
 
 ## 目标
 
-把 Agent 运行时从入口层中抽离，形成可被 API、MCP、工作流和未来 CLI 复用的统一能力包。
+- 建立 `@toonflow/agents` 的单次 agent run 协议与统一事件流
+- 明确 `artifact` / `result` 的边界与语义，形成稳定的输出契约
+- 建立依赖注入与运行时装配方式，保证跨入口复用
+- 首批范围只覆盖 `outline / script / storyboard / assets / video`
 
-本阶段直接建设新的 Agent 接口，不保留旧传输协议适配层作为长期方案。
+## 范围
 
----
+- `@toonflow/agents` 负责单次 agent run 的执行契约、事件协议与输出边界
+- 首批范围只覆盖 `outline / script / storyboard / assets / video`
+- `@toonflow/agents` 负责单次 agent run 协议、统一事件流、artifact/result 边界与依赖注入
+- `@toonflow/services` 仍负责业务用例、事务与持久化归属
 
-## 包结构建议
+## 非目标
 
-```text
-packages/agents/
-├── src/
-│   ├── index.ts
-│   ├── types.ts
-│   ├── outline/
-│   │   └── index.ts
-│   ├── storyboard/
-│   │   └── index.ts
-│   └── runtime/
-│       ├── context.ts
-│       └── events.ts
-├── package.json
-└── tsconfig.json
-```
+- run 生命周期、状态机、暂停/恢复/重试、审核返工与阶段推进不属于本阶段
+- HTTP、MCP、SSE、WebSocket 等传输层协议适配不下沉到 `@toonflow/agents`
+- 不做入口层 Agent 调用封装迁移，也不承诺旧入口实现的等价搬迁
 
----
+## 关键决策
 
-## 核心设计
+- `@toonflow/agents` 可依赖 `@toonflow/services`、`@toonflow/ai-providers`、`@toonflow/storage`、`@toonflow/kernel`
+- `services` 是同名内容域的业务 owner，`agents` 不是同名 service 的替代者
+- `AgentContext.services` 只允许读查询门面，`agent run` 不允许通过 services 间接落库
 
-### 1. 依赖显式注入
+## Agent 运行时职责与相邻阶段边界
 
-Agent 通过 context 接收依赖：
+- `@toonflow/agents` 聚焦单次 agent run 执行、统一事件流与 `artifact` / `result` 输出语义
+- `@toonflow/services` 负责业务用例、事务与持久化归属，仍是业务入口调用的默认依赖
+- `@toonflow/workflow` 在 Phase 5 负责长流程编排与阶段推进，本阶段不提前设计 workflow
+- 传输层协议与入口层适配留在 `apps/api` / `apps/mcp-server`，不下沉到 `@toonflow/agents`
 
-```ts
-interface AgentContext {
-  services: ServiceRegistry;
-  ai: AIRegistry;
-  storage: StorageAdapter;
-  logger?: Logger;
-}
-```
+## 集成方式
 
-数据访问通过 services 暴露的领域接口完成，Agent 不直接依赖 repository 或 `DbClient`。
+- `apps/api` / `apps/mcp-server` 的常规业务调用面继续优先消费 `@toonflow/services`
+- Phase 4 只允许隔离的 `internal/preview/debug` 入口直连 `@toonflow/agents`
+- 内容生产主链在 Phase 5 后应由 `@toonflow/workflow` 组合驱动 `@toonflow/agents`
 
-不允许内部直接读取全局单例。
+## 首批交付基线
 
-### 2. 统一事件协议
+- 首批交付基线是建立双层文档、统一运行时边界与五组 Agent 分组，而不是提前设计 workflow
+- 首批范围只覆盖 `outline / script / storyboard / assets / video`
 
-```ts
-interface AgentEvent {
-  type: "stream" | "toolCall" | "progress" | "artifact" | "result" | "error";
-  data: unknown;
-}
-```
+## 交付物
 
-Agent 对外暴露的主接口应是：
+- `docs/refactoring/04-agent-runtime.md`
+- `docs/refactoring/04-agent-runtime-spec.md`
 
-- `run()`：一次性命令执行
-- `stream()`：基于 `AsyncGenerator<AgentEvent>` 的流式输出
+## 验收标准
 
-### 3. 入口层只做协议翻译
+- 边界清晰：`@toonflow/agents` 与 `@toonflow/services`、`workflow` 的职责切分可核对
+- 依赖方向一致：依赖允许清单与装配口径一致
+- 主路径与允许路径清晰：常规业务调用面走 `services`，`internal/preview/debug` 直连受控
+- `artifact` / `result` 语义稳定，可被多入口一致消费
 
-- `apps/api` 把 `AgentEvent` 翻译成 WebSocket / SSE
-- `apps/mcp-server` 把结果转换成 MCP tool response
-- `packages/workflow` 负责调度与阶段管理
+## 风险与注意事项
 
----
-
-## 多入口消费示意
-
-### WebSocket
-
-```ts
-for await (const event of outlineAgent.stream(input)) {
-  ws.send(JSON.stringify(event));
-}
-```
-
-### MCP
-
-```ts
-const result = await outlineAgent.run(input);
-return { content: [{ type: "text", text: result.summary }] };
-```
-
-### Workflow
-
-```ts
-for await (const event of storyboardAgent.stream(input)) {
-  workflowRuntime.appendEvent(runId, event);
-}
-```
-
----
-
-## 依赖关系
-
-| 依赖包 | 用途 |
-|--------|------|
-| `@toonflow/kernel` | 共享类型、错误、schema |
-| `@toonflow/ai-providers` | 模型调用 |
-| `@toonflow/storage` | 文件与素材 |
-| `@toonflow/services` | 领域服务 |
-
----
-
-## 验证标准
-
-- Agent 包可独立通过 `build`、`lint`、`typecheck`
-- API、MCP、Workflow 三个入口都能消费同一套 Agent 实现
-- 关键 Agent 具备直接测试覆盖
-- 入口层不需要知道 Agent 内部如何组织模型调用
+- 风险：运行时过薄退化为脚本集合，无法形成统一的 Agent 运行时协议
+- 风险：运行时过胖侵入 services / workflow，导致职责提前混杂
