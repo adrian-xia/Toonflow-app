@@ -1,0 +1,3 @@
+$brainstorming docs/refactoring/06-api-gateway.md，处理这个，要参考 architecture-overview.md 架构概览，进行文档扩充
+
+
